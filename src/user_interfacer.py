@@ -3,7 +3,7 @@ from termcolor import cprint
 from session_manager import SessionManager
 
 
-class UserInterfacer:
+class GameManager:
     def __init__(self) -> None:
         self.session = SessionManager()
         self.ui_top_level_orchestrator()
@@ -15,7 +15,7 @@ class UserInterfacer:
             #! show my tasks for the day
             cprint("\nHere are your options: ", color="red")
             cprint(
-                "b: Start my day \t a: Add activity \t e: End session \t l: Lookback at today",
+                "b: Start my day \t a: Add activity \t e: End session \t l: Lookback at today \t t: Show tomorrow",
                 color="yellow",
             )
             path = input("choose option\t--> ")
@@ -28,6 +28,8 @@ class UserInterfacer:
                 self.session.begin_today_session()
             if path == "l":
                 self.session.lookback_session()
+            if path == "t":
+                self.session.lookahead_session()
 
         pass
 
@@ -36,4 +38,4 @@ class UserInterfacer:
 
 
 if __name__ == "__main__":
-    u = UserInterfacer()
+    u = GameManager()

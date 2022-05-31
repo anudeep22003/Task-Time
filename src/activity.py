@@ -1,15 +1,17 @@
 from dataclasses import dataclass
 from datetime import date, timedelta
-from db_interface import SQLHandler
-from pprint import pprint
 from termcolor import cprint
+import functools
 
-from query_factory import SqlQueryFactory
+from query_factory import SqlActivityQueryFactory, SqlGeneralQueryFactory
+from stopwatch import Timer
+
+import time
 
 
 class ActivityInterfacer:
     def __init__(self) -> None:
-        self.sql = SQLHandler()
+        self.query = SqlGeneralQueryFactory()
         pass
 
     def create_activity():
@@ -45,12 +47,13 @@ class ActivityInterfacer:
             created_by = creator
             activity_date = date.today() + timedelta(days=0)
             status = "NOT_STARTED"
+            time_used = 0
 
             row.extend(
-                [created_by, activity, allocated_time, "", status, activity_date]
+                [created_by, activity, allocated_time, "", status, activity_date, time_used]
             )
 
-            self.sql.insert_row(payload=row)
+            self.query.q_insert_row(payload = row)
 
     def start_day(self):
         print(
@@ -59,72 +62,127 @@ class ActivityInterfacer:
             )
         )
         print("{:*^10s}\t{:*^10s}\t{:*<10s}\t{:*<20s}".format("", "", "", ""))
-        for row in self.sql.read_rows(status="INCOMPLETE"):
-            id, activity, time, status = row
+        for row in self.query.read_rows_by_status(status="INCOMPLETE"):
+            id, activity, time_allocated, status, time_used = row
+            time_string = f"{time_used} / {time_allocated}"
             print(
                 "{:^10s}\t{:^10s}\t{:<10s}\t{:<20s}".format(
-                    str(id), str(time), status, activity
+                    str(id), str(time_string), status, activity
                 )
             )
 
-    def lookback(self):
+    def look(self, direction:str = "back"):
         print(
             "{:^10s}\t{:^10s}\t{:<10s}\t{:<20s}".format(
                 "id", "time", "status", "activity"
             )
         )
         print("{:*^10s}\t{:*^10s}\t{:*<10s}\t{:*<20s}".format("", "", "", ""))
-        for row in self.sql.read_rows(status="COMPLETED"):
-            id, activity, time, status = row
+        
+        if direction == 'back':
+            data = self.query.read_rows_by_status(status="COMPLETED")
+        else:
+            data = self.query.read_rows_by_status(status="INCOMPLETE", days_offset=1)
+        
+        for row in data:
+            id, activity, time_allocated, status, time_used = row
+            time_string = f"{str(time_used)} / {str(time_allocated)}"
             print(
                 "{:^10s}\t{:^10s}\t{:<10s}\t{:<20s}".format(
-                    str(id), str(time), status, activity
+                    str(id), str(time_string), status, activity
                 )
             )
         pass
 
     def instantiate_activity(self, id: int):
         # print("entered here")
-        activity_payload = self.retreive_activity(id)
-        return Activity(activity_payload)
-
-    def retreive_activity(self, id):
-        keys, output = self.sql.read_rows(id=id, include_keys=True)
-        # print(keys)
-        # print(output)
-
-        # pprint(dict(zip(keys,output)))
-        # print("exited here")
-        return dict(zip(keys, output[0]))
+        return Activity(id=id)
 
 
 @dataclass
 class Activity:
-    def __init__(self, row: dict) -> None:
-        self.id = row["id"]
-        self.created_by = row["created_by"]
-        self.activity = row["activity"]
-        self.time_allocated = row["time_allocated"]
-        self.context = row["context"]
-        self.status = row["status"]
-        self.date = row["date"]
-
-        self.sql = SQLHandler()
-        self.query = SqlQueryFactory()
+    
+    
+    
+    def __init__(self, id: int) -> None:
+        self.id = id
+        self.general_query = SqlGeneralQueryFactory()
+        self.query = SqlActivityQueryFactory(id = self.id)
+        self.timer = Timer
+        
+        self.v = self.set_reset_value(initialize=True)
+        
         pass
+    
+    # def instantiate_activity(self, id: int):
+    #     # print("entered here")
+    #     activity_payload = self.retreive_activity(id)
+    #     return Activity(activity_payload)
 
-    def activity_update(self, status="RUNNING"):
-
-        q = f"""
-            Update activity
-            set status = "{status}"
-            where id = {self.id}
+    def set_reset_value(self, initialize:bool = False):
+        keys, output = self.general_query.return_activity_row(id=self.id, include_keys=True)
+        if initialize:
+            return dict(zip(keys, output[0]))
+        else:
+            self.v = dict(zip(keys, output[0]))
+    
+    #! currently unused
+    def update_dict_decorator(self, fn):
+        @functools.wraps(fn)
+        def update_decorator(*args, **kwargs):
+            value_from_og_fn = fn(*args, **kwargs)
+            self.v = self.initialize_dict_of_value()
+            return value_from_og_fn
+        return update_decorator
+    
+    
+    def run_timer(self):
+        
         """
-        self.sql.execute_write_query(q)
+        This function uses the timer object that was passed during initialization and runs the timer.
+        - It sets the status as active when the timer starts
+        - the timer returns the #mins completed based on which the output to the stdio changes
+        - at the end, the 'activity_end_flow' function is called to give the user further options to end the task
+        
+        (if the user exits without the timer having run down, and the user doesnt set a status then the "ACTIVE" status is persisted)
+        """
+        
+        time_allocated = int(self.v["time_allocated"])
+        time_used = int(self.v["time_used"])
+        
+        length_of_time = time_allocated - time_used
+        start_time = time.time()
+        t = self.timer(length_of_time, start_time, units='mins')
+        # change status to active 
+        self.set_status(user_set_status='ACTIVE')
+        # start timer
+        time_used = t.stopwatch_orchestrator()
+        
+        print(f"time used is {time_used}")
+        # update the table with the time used
+        self.query.q_activity_update_time_used(time_used)
+        self.set_reset_value()
+        print("Time used is updated, and values refreshed.\n")
 
-        self.status = status
+        # if timer runs down, ask user to set status
+        if time_used != time_allocated:
+            cprint(f"Only {time_used} of {time_allocated} mins done.")
+            self.activity_end_flow()
+        else:
+            self.activity_end_flow()
+            
+        
+        
 
     def activity_edit(self):
+        """
+        
+        Allows the user to edit the activity. 
+        - Takes input from the user via the stdio (and allows blank input to keep the same data)
+        - Once the payload is constructed it is passed to the query class to build and execute the query
+        
+        """
+        
         cprint("You are now editing a task (x: to exit)", color="yellow")
         cprint(
             "Enter new activity description (or press enter to leave unchanged)",
@@ -143,12 +201,12 @@ class Activity:
 
         # check for empty returns
         if new_activity == "":
-            new_activity = self.activity
+            new_activity = self.v["activity"]
         if new_time == "":
-            new_time = self.time_allocated
+            new_time = self.v["time_allocated"]
 
         # run an update query and inform on status of completion
-        if self.query.q_activity_edit(self.id, new_activity, new_time):
+        if self.query.q_activity_edit(new_activity, new_time):
             cprint("Succesfully updated", color="green")
         else:
             cprint("Failed try again", color="red")
@@ -168,9 +226,8 @@ class Activity:
             try:
                 extra_time = int(extra_time)
                 if self.query.q_activity_edit(
-                    self.id,
-                    self.activity,
-                    updated_time=self.time_allocated + extra_time,
+                    self.v["activity"],
+                    updated_time=self.v["time_allocated"] + extra_time,
                 ):
                     cprint("Succesfully updated time", color="green")
                     break
@@ -188,8 +245,9 @@ class Activity:
         while True:
 
             if user_set_status in status.values():
-                if self.query.q_status_update(self.id, status=user_set_status):
-                    cprint(f"status updated to {user_set_status}", color="green")
+                if self.query.q_activity_status_update(status=user_set_status):
+                    self.set_reset_value()
+                    cprint(f"status updated to {user_set_status} and values refreshed.", color="green")
                     break
                 else:
                     cprint("something went wrong", color="red")
@@ -208,8 +266,9 @@ class Activity:
                 break
             else:
                 # update the status
-                if self.query.q_status_update(self.id, status[choice]):
-                    cprint(f"status updated to {status[choice]}", color="green")
+                if self.query.q_activity_status_update(status[choice]):
+                    self.set_reset_value()
+                    cprint(f"status updated to {status[choice]} and values refreshed", color="green")
                     break
                 else:
                     cprint("something went wrong", color="red")
@@ -224,10 +283,11 @@ class Activity:
             try:
                 days_in_future = int(days_in_future)
                 # update date
-                if self.query.q_date_update(self.id, days_in_future):
+                if self.query.q_activity_date_update(days_in_future):
+                    self.set_reset_value()
                     cprint(
-                        f"Rescheduled to #{days_in_future} days in the future",
-                        color="green",
+                        f"Rescheduled to #{days_in_future} days in the future and values updated.",
+                        color="green"
                     )
                     break
                 else:
@@ -266,7 +326,8 @@ class Activity:
                 # option here to have an out, will remove after
                 break
             elif choice == "s":
-                cprint(f"Current status\t--> {self.status}", color="yellow")
+            
+                cprint("Current status\t--> {}".format(self.v["status"]), color="yellow")
                 self.set_status()
 
             elif choice == "t":
@@ -294,7 +355,7 @@ class Activity:
 
     def show_feedback(self):
         keys = ["#Activities", "Total time", "Average time"]
-        response = self.query.q_sum_of_time(date=self.date)
+        response = self.general_query.q_sum_of_time(date=self.v["date"])
         for r in response:
             for k, v in zip(keys, r):
                 cprint(f"{k}: {v}\t", end="", color="green")
@@ -315,7 +376,7 @@ class Activity:
                 # add context
                 cprint("\nEnter the context here", color="yellow")
                 user_input_context = input("Enter here\t--> ")
-                self.query.q_update_context(id=self.id, context=user_input_context)
+                self.query.q_activity_update_context(context=user_input_context)
 
             elif choice == "n":
                 # add a note

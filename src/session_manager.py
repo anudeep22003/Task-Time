@@ -1,8 +1,7 @@
-from typing import Callable
+from enum_factory import User
+
 from termcolor import cprint
 from activity import ActivityInterfacer, Activity
-from stopwatch import Timer
-import time
 
 
 class SessionManager:
@@ -25,16 +24,16 @@ class SessionManager:
             self.task_session(activity)
             # give task level options here
             # edit, start, mark completed
-        pass
-
-        pass
 
 
     def create_activity_session(self):
         self.ai.create_new_activity()
 
     def lookback_session(self):
-        self.ai.lookback()
+        self.ai.look(direction='back')
+        
+    def lookahead_session(self):
+        self.ai.look(direction="ahead")
 
     def task_session(self, activity: Activity):
         """
@@ -55,13 +54,13 @@ class SessionManager:
             )
             choice = input("Make selection\t--> ")
             if choice == "b":
-                ActivitySession(activity)
+                activity.run_timer()
                 break
             if choice == "e":
                 activity.activity_edit()
                 break
             if choice == "s":
-                cprint(f"Current status\t--> {activity.status}", color="yellow")
+                cprint(f"Current status\t--> {activity.v['status']}", color="yellow")
                 activity.set_status()
                 break
             if choice == "r":
@@ -69,46 +68,3 @@ class SessionManager:
                 break
             if choice == "x":
                 break
-
-
-
-
-class ActivitySession:
-    def __init__(self, activity: Activity) -> None:
-        self.activity = activity
-        self.session_start_time = time.time()
-
-        self.timer = Timer(
-            length_of_time=activity.time_allocated,
-            start_time=self.session_start_time,
-            units="mins",
-        )
-
-        self.orchestrate()
-
-    def orchestrate(self):
-        # print("enterred the orchestration of ActivitySession")
-        try:
-            self.activity.set_status(user_set_status="ACTIVE")
-            time_done = self.timer.stopwatch_orchestrator()
-            if time_done is True:
-                cprint("Timer ran down.")
-                self.activity.activity_end_flow()
-            else:
-                cprint(
-                    f"Only {round((self.activity.time_allocated/self.timer.multiplier),1)} of {time_done}mins done."
-                )
-                self.activity.activity_end_flow()
-                #! this is going into an endless loop
-                
-                # if self.activity.activity_end_flow() is not None:
-                #     self.duplicator(
-                #                 activity = f"DUPLICATED + {self.activity.activity}", 
-                #                 allocated_time = self.activity.time_allocated, 
-                #                 days_in_future = 1,
-                #                 creator=f"task id {self.activity.id}"                         
-                #     )
-                    
-        except Exception as e:
-            self.activity.set_status(user_set_status="PAUSED")
-            print(e)
