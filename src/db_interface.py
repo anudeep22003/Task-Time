@@ -1,12 +1,10 @@
 import sqlite3
 from termcolor import cprint
-from datetime import date, timedelta
 
 
 class SQLHandler:
     def __init__(self, reset=False) -> None:
         self.reset = reset
-        self.column_keys = self.initialize_columns()
         self.con, self.cur = self.initialize_connection()
         self.initialize_table()
 
@@ -18,17 +16,6 @@ class SQLHandler:
         cur = con.cursor()
         return con, cur
 
-    def initialize_columns(self):
-        return [
-            "id",
-            "created_by",
-            "activity",
-            "time_allocated",
-            "context",
-            "status",
-            "date",
-        ]
-
     def execute_initialization_script(self, q: str):
         try:
             self.con.executescript(q)
@@ -39,19 +26,6 @@ class SQLHandler:
             print(e)
             return False
 
-    def execute_write_query(self, q: str, data=None):
-
-        if data is None:
-            self.cur.execute(q)
-        else:
-            self.cur.execute(q, data)
-
-        self.con.commit()
-
-        return True
-
-    def execute_read_query(self, q):
-        return self.cur.execute(q).fetchall()
 
     def initialize_table(self):
         if self.reset:
@@ -86,7 +60,8 @@ class SQLHandler:
                     time_allocated real,
                     context text, 
                     status text,
-                    date text
+                    date text,
+                    time_used text
                 );
                 
                 CREATE TABLE IF NOT EXISTS activity_details (
@@ -109,46 +84,3 @@ class SQLHandler:
         else:
             cprint("\nxxxxxxx Creation failed. xxxxxxx\n", color="red")
 
-    def insert_row(self, payload: list):
-        insert_query = """ INSERT INTO activity 
-        (created_by, activity, time_allocated, context, status, date)
-        VALUES (?, ?, ?, ?, ?, ?)"""
-        self.execute_write_query(q=insert_query, data=payload)
-
-    def read_rows(self, days_offset=0, status=None, id=None, include_keys=False):
-
-        d = date.today() + timedelta(days=days_offset)
-        d = d.strftime("%Y-%m-%d")
-        if status is None and id is None:
-
-            read_query = f"""select id, activity, time_allocated, status from activity 
-                    where date = "{d}"
-            """
-        elif status is None and id is not None:
-            read_query = f"""select * from activity 
-                    where date = "{d}" and id = {id}
-            """
-
-        elif status == "INCOMPLETE":
-            # filter = [f"and {k} = {v}" for k,v in status.items()]
-            read_query = f"""select id, activity, time_allocated, status from activity 
-                    where date = "{d}" and status != "COMPLETED" 
-            """
-
-        elif status == "COMPLETED":
-            # filter = [f"and {k} = {v}" for k,v in status.items()]
-            read_query = f"""select id, activity, time_allocated, status from activity 
-                    where date = "{d}" and status = "COMPLETED" 
-            """
-
-        else:
-            read_query = f"""select * from activity 
-                    where date = "{d}" and status = "COMPLETED" 
-            """
-
-        output = self.execute_read_query(q=read_query)
-
-        if include_keys:
-            return self.column_keys, output
-        else:
-            return output
