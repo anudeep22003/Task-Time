@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from termcolor import cprint
 import functools
+from enum_factory import User
 
 from query_factory import SqlActivityQueryFactory, SqlGeneralQueryFactory
 from stopwatch import Timer
@@ -14,26 +15,9 @@ class ActivityInterfacer:
         self.query = SqlGeneralQueryFactory()
         pass
 
-    def create_activity():
-        pass
-
-    def activity_register():
-        pass
-
-    def activity_editor():
-        pass
-
-    def activity_deletor():
-        pass
-
-    def load_activity():
-        pass
-
-    def show_today_activities():
-        today = date.today()
-        # fetch today's tasks
-        pass
-
+    def delete_activity(self, id: int):
+        self.query.q_delete_activity(id)
+    
     def create_new_activity(self, 
                             creator="Anudeep" 
                             ):
@@ -114,10 +98,6 @@ class Activity:
         
         pass
     
-    # def instantiate_activity(self, id: int):
-    #     # print("entered here")
-    #     activity_payload = self.retreive_activity(id)
-    #     return Activity(activity_payload)
 
     def set_reset_value(self, initialize:bool = False):
         keys, output = self.general_query.return_activity_row(id=self.id, include_keys=True)
@@ -237,6 +217,8 @@ class Activity:
             except Exception as e:
                 cprint(f"Exception {e}. Try again, please enter integer value.")
 
+    
+    
     def set_status(self, user_set_status=None):
 
         status = {"c": "COMPLETED", "n": "NOT_STARTED", "p": "PAUSED", "a": "ACTIVE"}
@@ -340,8 +322,7 @@ class Activity:
                 pass
 
             elif choice == "d":
-                cprint("Duplicating to tomorrow, but not really", color="red")
-                return "Something to trigger func call"
+                self.create_daughter_event()
 
             # mark status
 
@@ -382,8 +363,57 @@ class Activity:
                 # add a note
                 cprint("\nEnter the notes here", color="yellow")
                 note = input("Enter here\t--> ")
-                pass
+                
+    
+    def create_activity(self, activity: str = None, days_offset:int = 1):
+        
+        row = []
+        if activity is None:
+            activity = self.v["activity"]
+        allocated_time = self.v["time_allocated"]
+        created_by = self.id
+        activity_date = date.today() + timedelta(days=days_offset)
+        status = "NOT_STARTED"
+        time_used = 0
+        
+        row.extend([created_by, activity, allocated_time, "", status, activity_date, time_used])
+        self.general_query.q_insert_row(payload=row)
 
+    def create_daughter_event(self):
+        
+        # interface with the user
+        valid_choices = ["1","2","3", 'x']
+        while True:
+            cprint("1: create related event \t 2: duplicate event to tomorrow \t 3: duplicate to x days in the future", color=User.config['feedback-neutral'])
+            
+            choice = input("Enter choice --> ")
+            if choice not in valid_choices:
+                cprint("Invalid choice, try again.")
+            elif choice == 'x':
+                break
+            else:
+                choice = int(choice)
+            if choice == 1:
+                cprint("current: {}\n enter new: --> ".format(self.v["activity"]), color = User.config["feedback-neutral"], end = '')
+                related_activity = input (" ")
+                if related_activity == 'x':
+                    pass
+                else:
+                    self.create_activity(activity=related_activity)
+            elif choice == 2:
+                self.create_activity()
+                cprint("Activity duplicated to tomorrow", color=User.config['feedback-neutral'])
+            elif choice == 3:
+                num_days_in_future = input("How many days in future \t --> ")
+                if num_days_in_future == 'x':
+                    pass
+                else:
+                    self.create_activity(days_offset=int(num_days_in_future))
+                    cprint(f"Activity duplicated to {num_days_in_future} in future", color=User.config['feedback-neutral'])
+                        
+            # option to copy the event as is 
+            # option to change time 
+            # create a different but related daughter event
+        
         pass
 
-    pass

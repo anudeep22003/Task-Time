@@ -74,6 +74,10 @@ class SqlGeneralQueryFactory:
             "date",
             "time_used"
         ]
+        
+    def q_delete_activity(self, id: int):
+        q = f"DELETE FROM activity WHERE id = {id}"
+        return self.sql.execute_write_query(q)
     
     def q_sum_of_time(self, date: str, status: str = "COMPLETED"):
         q = f"""Select 
