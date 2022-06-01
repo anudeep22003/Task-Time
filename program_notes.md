@@ -68,4 +68,17 @@ Improvements:
     - the table is created but the context is not being captured. However the options are there.
 - [] enable bulk edit of events
 - [] build simple tkinter ui 1
+
+- [] when I add a task, show me number of hours accounted for in the day
+- [] When I control break to exit out of a timer, give me my options there - start new task, add related task, mark completed, and so on
+- [] Use SQL Alchemy --> https://auth0.com/blog/sqlalchemy-orm-tutorial-for-python-developers/
+- [] Rough waters, smooth sailing from here on - the peak of anxiety before flow
+- [] Capture sub tasks while doing main task (start timer for them)
+
+Bugs
+- [] Asking for extra time and restarting again does not remember the amount of time passed in the previous iteration.
+
+Current task in focus
+- [x] allow me to duplicate a task to tomorrow
+- [] allow deletion of tasks
 - [] when event is done give user option to add a follow-up event that comes from the previous one. 

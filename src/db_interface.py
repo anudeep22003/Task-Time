@@ -16,6 +16,7 @@ class SQLHandler:
         cur = con.cursor()
         return con, cur
 
+
     def execute_initialization_script(self, q: str):
         try:
             self.con.executescript(q)
@@ -30,8 +31,12 @@ class SQLHandler:
     def initialize_table(self):
         if self.reset:
 
-            drop_query = "DROP TABLE IF EXISTS activity, activity_details"
-            self.execute_write_query(q=drop_query)
+            drop_query = """DROP TABLE IF EXISTS activity;
+            DROP TABLE IF EXISTS activity_details;
+            """
+        else:
+            drop_query = ""
+            # self.execute_write_query(q=drop_query)
             self.reset = False
 
         initialize_query_detailed = """
@@ -51,7 +56,9 @@ class SQLHandler:
                 )
                 """
 
-        initialize_query = """
+        initialize_query = f"""
+                {drop_query}
+        
                 CREATE TABLE IF NOT EXISTS activity
                 (
                     id integer not null primary key,
@@ -84,3 +91,5 @@ class SQLHandler:
         else:
             cprint("\nxxxxxxx Creation failed. xxxxxxx\n", color="red")
 
+if __name__ == "__main__":
+    s = SQLHandler(reset=True)

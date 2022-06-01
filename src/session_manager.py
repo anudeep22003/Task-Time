@@ -1,4 +1,4 @@
-from enum_factory import User
+from enum_factory import User, Status
 
 from termcolor import cprint
 from activity import ActivityInterfacer, Activity
@@ -47,9 +47,10 @@ class SessionManager:
         while True:
             cprint("Here is the selected task", color="red")
             # print the task
+            cprint("\n--- {} -------- {} -------- {} of {} mins done.\n".format(activity.v["id"], activity.v["activity"], activity.v["time_used"], activity.v["time_allocated"]),color=User.config["feedback-neutral"])
             cprint("choose from one of the  following options", color="red")
             cprint(
-                "b: begin task\te: edit task\ts: set status\tr: reschedule task to another day\tx: exit",
+                "b: begin task\te: edit task\ts: set status\tr: reschedule task to another day\tde: delete task \tx: exit",
                 color="yellow",
             )
             choice = input("Make selection\t--> ")
@@ -65,6 +66,10 @@ class SessionManager:
                 break
             if choice == "r":
                 activity.change_date()
+                break
+            if choice == 'de':
+                self.ai.delete_activity(activity.id)
+                cprint("deleted activity", color=User.config["feedback-bad"])
                 break
             if choice == "x":
                 break
