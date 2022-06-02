@@ -92,4 +92,4 @@ class SQLHandler:
             cprint("\nxxxxxxx Creation failed. xxxxxxx\n", color="red")
 
 if __name__ == "__main__":
-    s = SQLHandler(reset=True)
+    s = SQLHandler(reset=False)

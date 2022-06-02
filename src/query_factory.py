@@ -1,7 +1,6 @@
+from multiprocessing import context
 import sqlite3
 from datetime import date, timedelta
-from xml.etree.ElementInclude import include
-from xmlrpc.client import Boolean
 
 
 class SqlActivityQueryFactory:
@@ -46,17 +45,63 @@ class SqlActivityQueryFactory:
 
         return self.sql.execute_write_query(q)
 
-    def q_activity_update_context(self, context):
+    # def q_activity_update_context(self, context):
 
-        q = f"""Insert into activity_details 
-        (activity_id, context, notes)
-        VALUES ({self.id}, "{context}","")
-        ON DUPLICATE KEY 
-            UPDATE context = context || ". {context}"
-        """
+    #     q = f"""Insert into activity_details 
+    #     (activity_id, context, notes)
+    #     VALUES ({self.id}, "{context}","")
+    #     ON DUPLICATE KEY 
+    #         UPDATE context = context || ". {context}"
+    #     """
 
-        return self.sql.execute_write_query(q)
+    #     return self.sql.execute_write_query(q)    
+
+
+class SqlActivityDetailsQueryFactory:
+
+    def __init__(self, parent_activity_id: int) -> None:
+        self.id = parent_activity_id
+        self.sql = SqlQueryExecutor()
         
+        # initialize the row 
+        self.initialize_details()
+        pass
+    
+    def initialize_details(self):
+        q = f""" INSERT OR IGNORE INTO activity_details (activity_id, context, notes, num_edits)
+        VALUES({self.id},"","", 0)
+        """
+        self.sql.execute_write_query(q)
+        pass
+    
+    def q_add_context_notes(self, context: str = "", notes: str = ""):
+        
+        if context:
+            context = f" {context}"
+        if notes:
+            notes = f" {notes}"
+        
+        q = f""" 
+        
+        UPDATE activity_details
+        SET 
+        context = context || "{context}",
+        notes = notes || "{notes}"
+        
+        WHERE
+        activity_id = {self.id}
+        """
+        
+        self.sql.execute_write_query(q)
+        pass
+    
+    def show_details(self):
+        q = f"""
+        SELECT context, notes FROM activity_details 
+        WHERE activity_id = {self.id}
+        """
+        return self.sql.execute_read_query(q)
+
 
 class SqlGeneralQueryFactory:
     def __init__(self) -> None:
