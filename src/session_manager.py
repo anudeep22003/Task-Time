@@ -16,7 +16,7 @@ class SessionManager:
     def begin_today_session(self):
         while True:
             self.ai.start_day()
-            cprint("choose the task id you want to start with", color="red")
+            cprint("\nchoose the task id you want to start with", color=User.config["notify"])
             id = input("Select id --> ")
             if id == "x" or id == "X":
                 break
@@ -45,15 +45,16 @@ class SessionManager:
         - exit
         """
         while True:
-            cprint("Here is the selected task", color="red")
+            # cprint("Here is the selected task", color="red")
             # print the task
-            cprint("\n--- {} -------- {} -------- {} of {} mins done.\n".format(activity.v["id"], activity.v["activity"], activity.v["time_used"], activity.v["time_allocated"]),color=User.config["feedback-neutral"])
+            cprint("\n--- {} -------- {} -------- {} of {} mins done.\n".format(activity.v["id"], activity.v["activity"], activity.v["time_used"], activity.v["time_allocated"]),color=User.config["notify"])
             # show details i.e. context and notes
             activity.show_details()
-            cprint("choose from one of the  following options", color="red")
+            # cprint("choose from one of the  following options", color=User.config["feedback-neutral"])
             cprint(
-                "b: begin task\te: edit task\ts: set status\tr: reschedule task to another day\tde: delete task \tx: exit",
-                color="yellow",
+                "\nb: begin\te: edit \ts: set status\tr: reschedule\tde: delete \tc/n: context/notes\tx: exit",
+                color=User.config["feedback-neutral"],
+                end = '\n'
             )
             choice = input("Make selection\t--> ")
             if choice == "b":
@@ -73,5 +74,7 @@ class SessionManager:
                 self.ai.delete_activity(activity.id)
                 cprint("deleted activity", color=User.config["feedback-bad"])
                 break
+            if choice == 'c' or choice == 'n':
+                activity.add_context()
             if choice == "x":
                 break

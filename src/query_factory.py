@@ -45,17 +45,6 @@ class SqlActivityQueryFactory:
 
         return self.sql.execute_write_query(q)
 
-    # def q_activity_update_context(self, context):
-
-    #     q = f"""Insert into activity_details 
-    #     (activity_id, context, notes)
-    #     VALUES ({self.id}, "{context}","")
-    #     ON DUPLICATE KEY 
-    #         UPDATE context = context || ". {context}"
-    #     """
-
-    #     return self.sql.execute_write_query(q)    
-
 
 class SqlActivityDetailsQueryFactory:
 

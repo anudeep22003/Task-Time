@@ -139,5 +139,3 @@ dmypy.json
 # DB-Stuff
 .db
 .sqbpro
->>>>>>> ce5d5f1 (Initial commit, this includes a working version with a sql db, and an interface to create objects and run down timers. No UI elements, the app runs nly on the CLI.)
->>>>>>> refs/remotes/origin/main

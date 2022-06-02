@@ -1,6 +1,7 @@
 import datetime
 from termcolor import cprint
 from session_manager import SessionManager
+from enum_factory import User
 
 
 class GameManager:
@@ -10,10 +11,10 @@ class GameManager:
         pass
 
     def ui_top_level_orchestrator(self):
-        cprint("Goodmorning! Here are your tasks for the day")
+        cprint("Goodmorning! Here are your tasks for the day", color = User.config["feedback-neutral"])
         while True:
             #! show my tasks for the day
-            cprint("\nHere are your options: ", color="red")
+            cprint("\nHere are your options: ", color=User.config["notify"])
             cprint(
                 "b: Start my day \t a: Add activity \t e: End session \t l: Lookback at today \t t: Show tomorrow",
                 color="yellow",

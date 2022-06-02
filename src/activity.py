@@ -42,7 +42,7 @@ class ActivityInterfacer:
 
     def start_day(self):
         print(
-            "{:^10s}\t{:^10s}\t{:<10s}\t{:<20s}".format(
+            "\n{:^10s}\t{:^10s}\t{:<10s}\t{:<20s}".format(
                 "id", "time", "status", "activity"
             )
         )
@@ -202,17 +202,19 @@ class Activity:
                 "Enter additional time needed (or press enter to leave unchanged)",
                 color="yellow",
             )
-            extra_time = input("Time\t--> ")
+            extra_time = input("\nTime\t--> ")
             if extra_time == "x" or extra_time == "X":
                 break
 
             try:
                 extra_time = int(extra_time)
+                updated_time=self.v["time_allocated"] + extra_time,
                 if self.query.q_activity_edit(
                     self.v["activity"],
-                    updated_time=self.v["time_allocated"] + extra_time,
+                    updated_time= self.v["time_allocated"] + extra_time
                 ):
-                    cprint("Succesfully updated time", color="green")
+                    cprint(f"New time --> {updated_time}", color=User.config["feedback-good"])
+                    self.set_reset_value()
                     break
                 else:
                     cprint("Failed try again", color="red")
@@ -294,11 +296,11 @@ class Activity:
         - add context / notes
         - schedule a follow-up for next day
         """
-        cprint("Timer ran out. Here are your options:", color="yellow")
-        valid_options = ["s", "t", "c", "d", "x"]
+        #cprint("Timer ran out. Here are your options:", color="yellow")
+        valid_options = ["s", "t", "c", "d", "x", "re"]
         while True:
             cprint(
-                "s: Set status\tt: more time needed\tc: add context/notes\td: duplicate to tomorrow\tx: done and exit",
+                "\ns: status\tt: more time\tc or n: context/notes\td: duplicate\tre: resume\tx: done and exit",
                 color="yellow",
             )
             choice = input("Enter choice\t--> ")
@@ -318,12 +320,14 @@ class Activity:
             elif choice == "t":
                 self.update_time()
 
-            elif choice == "c":
+            elif choice == "c" or choice == 'n':
                 # add context
-                print("TODO: option not yet added")
                 self.add_context()
                 pass
-
+            
+            elif choice == 're':
+                self.run_timer()
+            
             elif choice == "d":
                 self.create_daughter_event()
 
@@ -348,7 +352,10 @@ class Activity:
     def show_details(self):
         for row in self.query_details.show_details():
             context, notes = row
-            cprint(f"CONTEXT: {context}\nNOTES: {notes}",color = 'red', on_color="on_yellow")
+            if not context and not notes:
+                pass
+            else:
+                cprint(f"c:\t{context}\nn: {notes}",color = User.config["feedback-good"], end = '\n')
 
     def add_context(self):
         while True:
@@ -362,20 +369,20 @@ class Activity:
             elif choice == "x":
                 break
             elif choice == "c":
+                cprint("\nEnter the context here", color="yellow")
                 while True:
                     # add context
-                    cprint("\nEnter the context here", color="yellow")
-                    user_input_context = input("Enter here\t--> ")
+                    user_input_context = input("context -->\t")
                     if user_input_context == 'x':
                         break
                     self.query_details.q_add_context_notes(context = user_input_context)
                     # cprint("Added context in", color=User.config["feedback-good"])
 
             elif choice == "n":
+                cprint("\nEnter the notes here", color="yellow")
                 while True:
                     # add a note
-                    cprint("\nEnter the notes here", color="yellow")
-                    note = input("Enter here\t--> ")
+                    note = input("note -->\t")
                     if note == 'x':
                         break
                     self.query_details.q_add_context_notes(notes=note)
