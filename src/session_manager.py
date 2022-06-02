@@ -48,6 +48,8 @@ class SessionManager:
             cprint("Here is the selected task", color="red")
             # print the task
             cprint("\n--- {} -------- {} -------- {} of {} mins done.\n".format(activity.v["id"], activity.v["activity"], activity.v["time_used"], activity.v["time_allocated"]),color=User.config["feedback-neutral"])
+            # show details i.e. context and notes
+            activity.show_details()
             cprint("choose from one of the  following options", color="red")
             cprint(
                 "b: begin task\te: edit task\ts: set status\tr: reschedule task to another day\tde: delete task \tx: exit",

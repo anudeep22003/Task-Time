@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 from datetime import date, timedelta
+from email.utils import collapse_rfc2231_value
 from termcolor import cprint
 import functools
 from enum_factory import User
 
-from query_factory import SqlActivityQueryFactory, SqlGeneralQueryFactory
+from query_factory import SqlActivityDetailsQueryFactory, SqlActivityQueryFactory, SqlGeneralQueryFactory
 from stopwatch import Timer
 
 import time
@@ -92,11 +93,13 @@ class Activity:
         self.id = id
         self.general_query = SqlGeneralQueryFactory()
         self.query = SqlActivityQueryFactory(id = self.id)
+        self.query_details = SqlActivityDetailsQueryFactory(id)
         self.timer = Timer
         
         self.v = self.set_reset_value(initialize=True)
         
         pass
+    
     
 
     def set_reset_value(self, initialize:bool = False):
@@ -342,9 +345,14 @@ class Activity:
                 cprint(f"{k}: {v}\t", end="", color="green")
             print("\n")
 
+    def show_details(self):
+        for row in self.query_details.show_details():
+            context, notes = row
+            cprint(f"CONTEXT: {context}\nNOTES: {notes}",color = 'red', on_color="on_yellow")
+
     def add_context(self):
         while True:
-            valid_options = ["c", "a", "x"]
+            valid_options = ["c", "n", "x"]
 
             # add context or notes
             cprint("(c) Add context\t (n) Add notes\t (x) Exit", color="yellow")
@@ -354,15 +362,24 @@ class Activity:
             elif choice == "x":
                 break
             elif choice == "c":
-                # add context
-                cprint("\nEnter the context here", color="yellow")
-                user_input_context = input("Enter here\t--> ")
-                self.query.q_activity_update_context(context=user_input_context)
+                while True:
+                    # add context
+                    cprint("\nEnter the context here", color="yellow")
+                    user_input_context = input("Enter here\t--> ")
+                    if user_input_context == 'x':
+                        break
+                    self.query_details.q_add_context_notes(context = user_input_context)
+                    # cprint("Added context in", color=User.config["feedback-good"])
 
             elif choice == "n":
-                # add a note
-                cprint("\nEnter the notes here", color="yellow")
-                note = input("Enter here\t--> ")
+                while True:
+                    # add a note
+                    cprint("\nEnter the notes here", color="yellow")
+                    note = input("Enter here\t--> ")
+                    if note == 'x':
+                        break
+                    self.query_details.q_add_context_notes(notes=note)
+        self.show_details()
                 
     
     def create_activity(self, activity: str = None, days_offset:int = 1):

@@ -61,6 +61,9 @@ Improvements:
 - [] Record the accurate time to the db (if i run multiple sessions, it should take that into account)
 - [x] Mark as running not as completed
 - [x] Edit task 
+- [x] allow me to duplicate a task to tomorrow
+- [x] allow deletion of tasks
+- [x] when event is done give user option to add a follow-up event that comes from the previous one. 
 - [] give feedback on task selected that you are starting
 - [] keep track of number of hours scheduled (so i dont overbook my day)
 - [] have a graph always visible 
@@ -79,6 +82,3 @@ Bugs
 - [] Asking for extra time and restarting again does not remember the amount of time passed in the previous iteration.
 
 Current task in focus
-- [x] allow me to duplicate a task to tomorrow
-- [] allow deletion of tasks
-- [] when event is done give user option to add a follow-up event that comes from the previous one. 
