@@ -80,5 +80,10 @@ Improvements:
 
 Bugs
 - [] Asking for extra time and restarting again does not remember the amount of time passed in the previous iteration.
+- [] duplicating is not making a replica, rather it is moving the same event to the next day
+
+
+- [] Add ability to explore task, just do a task and add details later
+- [] dual thread so that timer stays running and I can take notes
 
 Current task in focus

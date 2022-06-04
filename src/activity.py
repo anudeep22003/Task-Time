@@ -386,7 +386,9 @@ class Activity:
                     if note == 'x':
                         break
                     self.query_details.q_add_context_notes(notes=note)
-        self.show_details()
+        
+        # removing since the begin clause already shows the details, and having it here shows it twice
+        # self.show_details()
                 
     
     def create_activity(self, activity: str = None, days_offset:int = 1):
