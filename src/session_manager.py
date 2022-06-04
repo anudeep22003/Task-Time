@@ -20,12 +20,28 @@ class SessionManager:
             id = input("Select id --> ")
             if id == "x" or id == "X":
                 break
-            activity = self.ai.instantiate_activity(id)
-            self.task_session(activity)
+            elif id == "bulk":
+                self.bulk_reschedule()
+                pass
+            else:
+            
+                activity = self.ai.instantiate_activity(id)
+                self.task_session(activity)
             # give task level options here
             # edit, start, mark completed
 
 
+    def bulk_reschedule(self):
+        cprint("you are in the bulk reschedule mode", color=User.config["notify"])
+        ids = input("Enter all the ids you want to reschedule separated by space\n--> ")
+        activity_id_list = [int(i) for i in ids.split()]
+        days_in_future = int(input("how many days in teh future?\t--> "))
+        for activity_id in activity_id_list:
+            activity = self.ai.instantiate_activity(activity_id)
+            activity.query.q_activity_date_update(days_in_future)
+            cprint(f"activity id {activity_id} rescheduled.",color=User.config["feedback-good"])
+        pass
+    
     def create_activity_session(self):
         self.ai.create_new_activity()
 
