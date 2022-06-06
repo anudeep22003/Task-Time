@@ -72,7 +72,7 @@ class SessionManager:
                 color=User.config["feedback-neutral"],
                 end = '\n'
             )
-            choice = input("Make selection\t--> ")
+            choice = input("-->\t")
             if choice == "b":
                 activity.run_timer()
                 break
