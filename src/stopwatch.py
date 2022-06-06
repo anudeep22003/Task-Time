@@ -7,12 +7,23 @@ from pydub.playback import play
 class Timer:
     def __init__(self, length_of_time: float, start_time: time, units="seconds", debug=False) -> None:
         
+        """
+        Functions:
+        time_unit_incorporator:
+            to allow for multiple time units the time_unit_incorporator function 
+            returns a multiplier (lenght of time in seconds to count down)
+            and the actual lenght of time to count down in seconds    
+        """
+        
         self.start_time = start_time
         self.units = units
 
+        # to allow for multiple time units the time_unit_incorporator function 
+        # returns a multiplier (lenght of time in seconds to count down)
+        # and the actual lenght of time to count down in seconds
         self.multiplier, self.length_of_time = self.time_unit_incorporator(length_of_time)
-        self.time_left = self.length_of_time
-
+        
+        
         if debug:
             self.stopwatch_orchestrator()
 
@@ -29,12 +40,17 @@ class Timer:
             return 1, time
 
     def stopwatch_orchestrator(self):
-        while self.time_left > 0:
+        
+        time_elapsed = time.time() - self.start_time
+        # while the timer has not run out, continue in the loop
+        
+        while self.length_of_time > time_elapsed:
             try:
+                # a temp variable I am using to keep track of how much time has elapsed in the timer
                 time_elapsed = round(time.time() - self.start_time, 0)
-                self.time_left = self.length_of_time - time_elapsed
+                
                 cprint(
-                    f"Time left: {self.time_left/self.multiplier} {self.units}",
+                    f"Time left: {(self.length_of_time - time_elapsed)/self.multiplier} {self.units}",
                     end="\r",
                     color="yellow",
                 )

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import date, timedelta
 from email.utils import collapse_rfc2231_value
+from pprint import pprint
 from termcolor import cprint
 import functools
 from enum_factory import User
@@ -55,6 +56,27 @@ class ActivityInterfacer:
                     str(id), str(time_string), status, activity
                 )
             )
+        self.sum_orchestrator()
+        # print sums 
+    
+    def sum_orchestrator(self, days_offset: int = 0):
+        print("{:-^10s}\t{:-^10s}\t{:-<10s}\t{:-<20s}".format("", "", "", ""))
+        print("{:^10s}\t{:^10s}\t{:^10s}\t{:^20s}".format("#activities", "used", "allocated", "%used"))
+        print("{:-^10s}\t{:-^10s}\t{:-<10s}\t{:-<20s}".format("", "", "", ""))
+        total_aggregate = self.query.q_get_aggregate_all(days_offset)
+        
+        # list with only a single item is returned so manually indexing to that
+        total_aggregate = total_aggregate[0]
+        
+        if not (None in total_aggregate):
+            num_activities, total_used, total_time_allocated = total_aggregate
+            print(
+                "{:^10.0f}\t{:^10.0f}\t{:^10.0f}\t{:^20.2%}".format(
+                    num_activities, total_used, total_time_allocated, (total_used/total_time_allocated)
+                ))
+        
+        total_aggregate = self.query.q_get_aggregate_all 
+        pass
 
     def look(self, direction:str = "back"):
         print(
@@ -130,22 +152,39 @@ class Activity:
         (if the user exits without the timer having run down, and the user doesnt set a status then the "ACTIVE" status is persisted)
         """
         
+        # extracts the time allocated value from the database and converts value to an int
         time_allocated = int(self.v["time_allocated"])
+        
+        # extracts the time used from the db and also converts to int
         time_used = int(self.v["time_used"])
         
+        # length of time is how long the timer is to run 
+        # and it is the diffence between how much was allocated and how much was used 
         length_of_time = time_allocated - time_used
+        
+        # we set the start time as time now
         start_time = time.time()
+        
+        # we create a timer object with how long it is supposed to run and what the start time is
         t = self.timer(length_of_time, start_time, units='mins')
-        # change status to active 
+        
+        # change status to active to mark that this task is currently running
         self.set_status(user_set_status='ACTIVE')
-        # start timer
+        
+        # we start the timer
         time_used = t.stopwatch_orchestrator()
         
-        print(f"time used is {time_used}")
+        # debug 
+        # print(f"{time_used} min used.")
+        
+        # update the time used value
+        time_used = time_used + int(self.v["time_used"])
+        
         # update the table with the time used
         self.query.q_activity_update_time_used(time_used)
         self.set_reset_value()
-        print("Time used is updated, and values refreshed.\n")
+        # debug
+        # print("Time used is updated, and values refreshed.\n")
 
         # if timer runs down, ask user to set status
         if time_used != time_allocated:
@@ -198,6 +237,7 @@ class Activity:
 
     def update_time(self):
         while True:
+            self.set_reset_value()
             cprint(
                 "Enter additional time needed (or press enter to leave unchanged)",
                 color="yellow",
@@ -208,10 +248,12 @@ class Activity:
 
             try:
                 extra_time = int(extra_time)
-                updated_time=self.v["time_allocated"] + extra_time,
+                
+                updated_time= self.v["time_allocated"] + extra_time
+                
                 if self.query.q_activity_edit(
                     self.v["activity"],
-                    updated_time= self.v["time_allocated"] + extra_time
+                    updated_time= updated_time
                 ):
                     cprint(f"New time --> {updated_time}", color=User.config["feedback-good"])
                     self.set_reset_value()
@@ -234,7 +276,8 @@ class Activity:
             if user_set_status in status.values():
                 if self.query.q_activity_status_update(status=user_set_status):
                     self.set_reset_value()
-                    cprint(f"status updated to {user_set_status} and values refreshed.", color="green")
+                    # debug
+                    # cprint(f"status updated to {user_set_status} and values refreshed.", color="green")
                     break
                 else:
                     cprint("something went wrong", color="red")
@@ -246,7 +289,7 @@ class Activity:
                 "Options:\n c: COMPLETED\tn: NOT STARTED\tp: PAUSED\ta: ACTIVE\tx: Exit",
                 color="yellow",
             )
-            choice = input("Enter choice\t--> ")
+            choice = input("-->\t")
             if choice not in valid_choices:
                 print("invalid choice try again")
             elif choice == "x":
@@ -255,7 +298,8 @@ class Activity:
                 # update the status
                 if self.query.q_activity_status_update(status[choice]):
                     self.set_reset_value()
-                    cprint(f"status updated to {status[choice]} and values refreshed", color="green")
+                    # debug 
+                    # cprint(f"status updated to {status[choice]} and values refreshed", color="green")
                     break
                 else:
                     cprint("something went wrong", color="red")
@@ -303,7 +347,7 @@ class Activity:
                 "\ns: status\tt: more time\tc or n: context/notes\td: duplicate\tre: resume\tx: done and exit",
                 color="yellow",
             )
-            choice = input("Enter choice\t--> ")
+            choice = input("-->\t")
             if choice not in valid_options:
                 cprint("Invalid choice try again", color="red")
             elif choice == "x":
@@ -363,7 +407,7 @@ class Activity:
 
             # add context or notes
             cprint("(c) Add context\t (n) Add notes\t (x) Exit", color="yellow")
-            choice = input("Enter choice\t--> ")
+            choice = input("-->\t")
             if choice not in valid_options:
                 cprint("Invalid choice; try again", color="red")
             elif choice == "x":
@@ -412,7 +456,7 @@ class Activity:
         while True:
             cprint("1: create related event \t 2: duplicate event to tomorrow \t 3: duplicate to x days in the future", color=User.config['feedback-neutral'])
             
-            choice = input("Enter choice --> ")
+            choice = input("-->\t")
             if choice not in valid_choices:
                 cprint("Invalid choice, try again.")
             elif choice == 'x':
@@ -443,3 +487,7 @@ class Activity:
         
         pass
 
+
+if __name__ == "__main__":
+    ai = ActivityInterfacer()
+    ai.sum_orchestrator(-6)

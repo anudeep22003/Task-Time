@@ -168,6 +168,37 @@ class SqlGeneralQueryFactory:
             """
         return self.sql.execute_read_query(q)
     
+    def q_get_aggregate_incomplete(self, days_offset:int = 0):
+        
+        d = self.date_to_string_converter(days_offset=days_offset)
+
+        q = f"""SELECT COUNT(*), SUM(time_used), SUM(time_allocated) FROM activity
+                WHERE date = "{d}" and status != "COMPLETED"
+                """
+        
+        return self.sql.execute_read_query(q)        
+        
+    def q_get_aggregate_complete(self, days_offset:int = 0):
+        
+        d = self.date_to_string_converter(days_offset=days_offset)
+
+        q = f"""SELECT COUNT(*), SUM(time_used), SUM(time_allocated) FROM activity
+                WHERE date = "{d}" and status = "COMPLETED"
+                """
+        
+        return self.sql.execute_read_query(q)        
+        
+    def q_get_aggregate_all(self, days_offset:int = 0):
+        
+        d = self.date_to_string_converter(days_offset=days_offset)
+
+        q = f"""SELECT COUNT(*), SUM(time_used), SUM(time_allocated) FROM activity
+                WHERE date = "{d}" 
+                """
+        
+        return self.sql.execute_read_query(q)        
+        
+        pass
 
 class SqlQueryExecutor:
     def __init__(self) -> None:
