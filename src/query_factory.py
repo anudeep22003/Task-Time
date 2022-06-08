@@ -18,7 +18,18 @@ class SqlActivityQueryFactory:
         
         return self.sql.execute_write_query(q)
     
+
+    def q_add_time(self, extra_time: int = 0):
+        q = f"""
+            UPDATE activity
+            SET time_allocated = time_allocated + {extra_time}
+            WHERE id = {self.id}
+        """
+        return self.sql.execute_write_query(q)
+
     def q_activity_edit(self, updated_activity: str, updated_time: str):
+
+                
         q = f""" 
         UPDATE activity
         SET activity = "{updated_activity}", time_allocated = "{updated_time}"
