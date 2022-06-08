@@ -1,7 +1,8 @@
 from enum_factory import User, Status
 
 from termcolor import cprint
-from activity import ActivityInterfacer, Activity
+from activity.activity import Activity
+from activity.activity_helper import ActivityInterfacer, ActivitySessionHandler
 
 
 class SessionManager:
@@ -24,10 +25,12 @@ class SessionManager:
                 self.bulk_reschedule()
                 pass
             else:
-            
-                activity = self.ai.instantiate_activity(id)
-                self.task_session(activity)
-            # give task level options here
+                
+                self.updated_task_session(id)
+                
+            #     activity = self.ai.instantiate_activity(id)
+            #     self.task_session(activity)
+            # # give task level options here
             # edit, start, mark completed
 
 
@@ -51,6 +54,11 @@ class SessionManager:
     def lookahead_session(self):
         self.ai.look(direction="ahead")
 
+    def updated_task_session(self, id: int):
+        activity_session = ActivitySessionHandler(id)
+        activity_session.orchestrate()
+        
+    
     def task_session(self, activity: Activity):
         """
         Print the task that has been selected
