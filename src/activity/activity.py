@@ -75,7 +75,7 @@ class Activity:
         t = self.timer(length_of_time, start_time, units='mins')
         
         # change status to active to mark that this task is currently running
-        self.updated_set_status(user_set_status='ACTIVE')
+        self.updated_set_status(status='ACTIVE')
         
         # we start the timer
         time_used = t.stopwatch_orchestrator()
