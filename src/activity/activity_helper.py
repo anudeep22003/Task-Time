@@ -1,4 +1,4 @@
-import time
+
 from termcolor import cprint
 from datetime import date, timedelta
 from activity.activity import Activity
@@ -115,15 +115,16 @@ class ActivitySessionHandler:
         - start task (start timer)
         - exit
         """
+        cprint("\n--- {} -------- {} -------- {} of {} mins done.\n".format(self.activity.v["id"], self.activity.v["activity"], self.activity.v["time_used"], self.activity.v["time_allocated"]),color=User.config["notify"])
+        self.activity.show_details()
+        
         while True:
             # cprint("Here is the selected task", color="red")
             # print the task
-            cprint("\n--- {} -------- {} -------- {} of {} mins done.\n".format(self.activity.v["id"], self.activity.v["activity"], self.activity.v["time_used"], self.activity.v["time_allocated"]),color=User.config["notify"])
             # show details i.e. context and notes
-            self.activity.show_details()
             # cprint("choose from one of the  following options", color=User.config["feedback-neutral"])
             cprint(
-                "\n(b))egin\t(t)ime add\t(e)dit\t(s)tatus\t(r)eschedule\t(d)aughter activity\n(c)ontext\t(n)otes\te(x)it",
+                "\n(b))egin\t(t)ime add\t(e)dit\t(s)tatus\t(r)eschedule\t(d)aughter\t(c)ontext\t(n)otes\te(x)it",
                 color=User.config["feedback-neutral"],
                 end = '\n'
             )
@@ -142,14 +143,16 @@ class ActivitySessionHandler:
             if choice == "r":
                 self.change_date()
                 break
-            # if choice == 'de':
-            #     self.ai.delete_activity(self.activity.id)
-            #     cprint("deleted activity", color=User.config["feedback-bad"])
-            #     break
+            
             if choice == 'c':
                 self.add_context()
+                # show the details after you added some in
+                self.activity.show_details()
+            
             if choice == 'n':
                 self.add_note()
+                # show the details after you added some in
+                self.activity.show_details()
             if choice == "x":
                 break
             if choice == 't':
@@ -160,17 +163,8 @@ class ActivitySessionHandler:
             
     def create_daughter(self):
         
+        cprint("Create related activity or duplicate event", color='yellow')
         while True:
-            cprint("Create related activity or duplicate event", color='yellow')
-
-            # choice = input("-->\t")
-            
-            # if choice == 'x':
-            #     break
-            
-            # if not choice in valid_choices:
-            #     cprint("Invalid selection, try again")
-        
             
             activity_desc = input("related activity (default: current activity) -->\t")
             
@@ -245,7 +239,7 @@ class ActivitySessionHandler:
         status_choices = {"c": "COMPLETED", "n": "NOT_STARTED", "p": "PAUSED", "a": "ACTIVE"}
         
         cprint(
-            "Options:\n c: COMPLETED\tn: NOT STARTED\tp: PAUSED\ta: ACTIVE\tx: Exit",
+            "\n c: COMPLETED\tn: NOT STARTED\tp: PAUSED\ta: ACTIVE\tx: Exit",
             color="yellow",
         )
         user_status_choice = input("-->\t")
@@ -254,7 +248,7 @@ class ActivitySessionHandler:
         elif not user_status_choice in status_choices.keys():
             cprint("Out of scope choice, try again", color='red')
         else:
-            self.activity.updated_set_status(user_status_choice)
+            self.activity.updated_set_status(status_choices[user_status_choice])
         
 
     def update_time(self):
