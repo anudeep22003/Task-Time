@@ -75,7 +75,7 @@ class Activity:
         t = self.timer(length_of_time, start_time, units='mins')
         
         # change status to active to mark that this task is currently running
-        self.set_status(user_set_status='ACTIVE')
+        self.updated_set_status(user_set_status='ACTIVE')
         
         # we start the timer
         time_used = t.stopwatch_orchestrator()
@@ -94,10 +94,6 @@ class Activity:
 
         # if timer runs down, ask user to set status
         cprint(f"{time_used} of {time_allocated} mins done.")
-        # if time_used != time_allocated:
-        #     self.activity_end_flow()
-        # else:
-        #     self.activity_end_flow()
             
         
         
