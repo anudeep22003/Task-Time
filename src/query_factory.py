@@ -19,6 +19,7 @@ class SqlActivityQueryFactory:
         return self.sql.execute_write_query(q)
     
 
+
     def q_add_time(self, extra_time: int = 0):
         q = f"""
             UPDATE activity
@@ -224,6 +225,8 @@ class SqlQueryExecutor:
         return con, cur
 
 
+    def last_row_inserted(self):
+        return self.cur.lastrowid
 
     def execute_write_query(self, q: str, data=None):
         try:
@@ -233,7 +236,7 @@ class SqlQueryExecutor:
                 self.cur.execute(q, data)
 
             self.con.commit()
-            return True
+            return self.last_row_inserted()
 
         except Exception as e:
             print(e)

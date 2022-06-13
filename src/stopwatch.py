@@ -39,6 +39,19 @@ class Timer:
         else:
             return 1, time
 
+    def time_printer(self, elapsed_time: time, total_time: time, multiplier: int = 60, turbulence: float = 0.1):
+        time_left = (total_time - elapsed_time)/multiplier
+        elapsed_time = elapsed_time/multiplier
+        
+        total_time = total_time/multiplier
+        turbulent_time = total_time * turbulence
+        if elapsed_time > turbulent_time and elapsed_time>10:
+            cprint(f""" Smooth sailing: {time_left} left of {total_time} mins""", color = 'yellow', end = '\r')
+        else:
+            cprint(f""" Turbulent: {time_left} left of {total_time} mins""", color = 'red', on_color='on_yellow', end = '\r')
+
+    
+    
     def stopwatch_orchestrator(self):
         
         time_elapsed = time.time() - self.start_time
@@ -49,11 +62,13 @@ class Timer:
                 # a temp variable I am using to keep track of how much time has elapsed in the timer
                 time_elapsed = round(time.time() - self.start_time, 0)
                 
-                cprint(
-                    f"Time left: {(self.length_of_time - time_elapsed)/self.multiplier} {self.units}",
-                    end="\r",
-                    color="yellow",
-                )
+                self.time_printer(time_elapsed, self.length_of_time, self.multiplier)
+                
+                # cprint(
+                #     f"Time left: {(self.length_of_time - time_elapsed)/self.multiplier} {self.units}",
+                #     end="\r",
+                #     color="yellow",
+                # )
                 time.sleep(self.multiplier)
             except KeyboardInterrupt:
                 # meaning timer was only partially required
