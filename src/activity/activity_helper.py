@@ -35,6 +35,24 @@ class ActivityInterfacer:
 
             self.query.q_insert_row(payload = row)
 
+    def create_empty_activity(self, time:int = 30, creator = "Anudeep"):
+        
+        # create an empty activity for explore mode
+        
+        activity = " "
+        allocated_time = time
+        created_by = creator
+        activity_date = date.today()
+        status = "NOT_STARTED"
+        time_used = 0
+        
+        row = [created_by, activity, allocated_time, "", status, activity_date, time_used]
+        
+        return self.query.q_insert_row(payload=row)
+        
+        
+        
+
     def start_day(self):
         print(
             "\n{:^10s}\t{:^10s}\t{:<10s}\t{:<20s}".format(
@@ -69,7 +87,7 @@ class ActivityInterfacer:
                     num_activities, total_used, total_time_allocated, (total_used/total_time_allocated)
                 ))
         
-        total_aggregate = self.query.q_get_aggregate_all 
+        # total_aggregate = self.query.q_get_aggregate_all 
         pass
 
     def look(self, direction:str = "back"):
@@ -263,6 +281,117 @@ class ActivitySessionHandler:
         except Exception as e:
             cprint(f"Exeption: {e} \nWrong format for time - try again, enter integer", color="red")
 
+
+class ExploreSessionHandler:
+    
+    """
+    This class is going to handle the user interface for the explore mode. 
+    
+    To do this you will need:
+    - Once you enter the explore mode, tell user so 
+    - The user chooses to start timer for 30-60-120 min session 
+    - User can end it wheneverk, but when they do they can:
+        - Ask for more time and get back to activity 
+        - Add the activitiy description 
+    - then they can end the session if they want or continue it / add time to it 
+    """
+    
+    def __init__(self) -> None:
+        self.ai = ActivityInterfacer()
+        pass
+    
+    def assign_activity(self,id: int):
+        return Activity(id)
+
+    def orchestrate(self):
+        cprint("\n------| You are now in explore mode |------\n", color= 'yellow')
+        # show tasks timed so far
+        
+        while True:
+            # report of the tasks explored today
+            self.ai.look(direction='back')
+            self.ai.sum_orchestrator()
+
+            id = self.create_shell_activity()
+            if id is None:
+                break
+            
+            activity = self.assign_activity(id)
+            # run the timer
+            self.activity_run_timer(activity)
+            
+    
+    def add_activity_desc(self, activity: Activity):
+        while True:
+            cprint("Enter description of activity", color = 'yellow')
+            description = input("--> ")
+            if description == 'x':
+                break
+            else:
+                activity.updated_activity_edit(new_act_description=description)
+                break
+                
+    def activity_run_timer(self, activity: Activity):
+        cprint("Starting timer\n", color='yellow')
+        activity.run_timer()
+        self.end_flow(activity)
+        
+
+    def activity_add_time(self, activity: Activity):
+        while True:
+            cprint("how much more time?")
+            try:
+                time = int(input("--> "))
+                activity.updated_update_time(time)
+
+                # continue the timer
+                break
+            
+            except Exception as e:
+                print("invalid choice, try again.")
+
+    def create_shell_activity(self):
+        while True:
+            cprint("\n----- Choose session size in mins (default 30 mins) ----- ", color='yellow')
+            user_size = input('-->\t')
+            if user_size == 'x':
+                return None
+            if not user_size:
+                user_size = 30
+            
+            try:
+                session_size = int(user_size)
+                
+                # create an empty activity
+                
+                id = self.ai.create_empty_activity(time=session_size)
+                return id
+                
+            except Exception as e:
+                print(e)
+    
+    def activity_exit(self, activity: Activity):
+        # update status to done 
+        activity.updated_set_status(status = 'COMPLETED')
+        
+    
+    def end_flow(self, activity: Activity):
+        valid_choices = ['t', 'd', 'c', 'x']
+        while True:
+            cprint("d: done, add description\t t: add time\t c: continue timer\t x: exit, next activity", color='yellow')
+            choice = input("--> ")
+            if choice not in valid_choices:
+                cprint("Out of bound choice, try again", color='red')
+            if choice == 'd':
+                self.add_activity_desc(activity)
+            if choice == 't':
+                self.activity_add_time(activity)
+            if choice == 'c':
+                self.activity_run_timer(activity)
+            if choice == 'x':
+                # exit and set the right status
+                self.activity_exit(activity)
+                break
 
 
 

@@ -72,7 +72,7 @@ class Activity:
         start_time = time.time()
         
         # we create a timer object with how long it is supposed to run and what the start time is
-        t = self.timer(length_of_time, start_time, units='mins')
+        t = self.timer(length_of_time, start_time, units='secs')
         
         # change status to active to mark that this task is currently running
         self.updated_set_status(status='ACTIVE')
@@ -99,8 +99,8 @@ class Activity:
         
     @update_values
     def updated_activity_edit(self, 
-                              new_act_description:str, 
-                              new_act_time: str):
+                              new_act_description:str = "", 
+                              new_act_time: str = ""):
         
         # generate default values if user presses enter without entering anything
         if not new_act_description:
