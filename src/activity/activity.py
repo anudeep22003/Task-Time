@@ -72,7 +72,7 @@ class Activity:
         start_time = time.time()
         
         # we create a timer object with how long it is supposed to run and what the start time is
-        t = self.timer(length_of_time, start_time, units='secs')
+        t = self.timer(length_of_time, start_time, units='mins')
         
         # change status to active to mark that this task is currently running
         self.updated_set_status(status='ACTIVE')
