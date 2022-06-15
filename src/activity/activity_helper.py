@@ -205,7 +205,7 @@ class ActivitySessionHandler:
         cprint("Enter new allocated time (or press enter to leave unchanged)", color="yellow")    
         new_time = input("Time\t--> ")
         
-        self.activity.updated_activity_edit(activity_description,new_time)
+        self.activity.activity_edit(activity_description,new_time)
 
             
     def add_context(self):
@@ -213,14 +213,14 @@ class ActivitySessionHandler:
             context = input("context\t--> ")
             if context == 'x':
                 return
-            self.activity.updated_add_context(context)
+            self.activity.add_context(context)
 
     def add_note(self):
         while True:
             note = input("note\t--> ")
             if note == 'x':
                 return
-            self.activity.updated_add_context(note)
+            self.activity.add_notes(note)
     
     def change_date(self):
         cprint("Reschedule by how many days?", color="yellow", end = '')
@@ -229,7 +229,7 @@ class ActivitySessionHandler:
             return
         try:
             days = int(days)
-            self.activity.updated_change_date(days)
+            self.activity.change_date(days)
             return
         except Exception as e:
             cprint(f"Exeption: {e} \nWrong format for #days - try again, enter integer", color="red")
@@ -248,7 +248,7 @@ class ActivitySessionHandler:
         elif not user_status_choice in status_choices.keys():
             cprint("Out of scope choice, try again", color='red')
         else:
-            self.activity.updated_set_status(status_choices[user_status_choice])
+            self.activity.set_status(status_choices[user_status_choice])
         
 
     def update_time(self):
@@ -258,7 +258,7 @@ class ActivitySessionHandler:
             return
         try:
             extra_time = int(extra_time)
-            self.activity.updated_update_time(extra_time)
+            self.activity.update_time(extra_time)
             return 
         except Exception as e:
             cprint(f"Exeption: {e} \nWrong format for time - try again, enter integer", color="red")
