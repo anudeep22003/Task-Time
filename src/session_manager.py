@@ -2,7 +2,7 @@ from enum_factory import User, Status
 
 from termcolor import cprint
 from activity.activity import Activity
-from activity.activity_helper import ActivityInterfacer, ActivitySessionHandler
+from activity.activity_helper import ActivityInterfacer, ActivitySessionHandler, ExploreSessionHandler
 
 
 class SessionManager:
@@ -57,48 +57,7 @@ class SessionManager:
     def updated_task_session(self, id: int):
         activity_session = ActivitySessionHandler(id)
         activity_session.orchestrate()
-        
-    
-    def task_session(self, activity: Activity):
-        """
-        Print the task that has been selected
-        Give user following options:
-        - edit task (edit description and time)
-        - mark as completed
-        - start task (start timer)
-        - exit
-        """
-        while True:
-            # cprint("Here is the selected task", color="red")
-            # print the task
-            cprint("\n--- {} -------- {} -------- {} of {} mins done.\n".format(activity.v["id"], activity.v["activity"], activity.v["time_used"], activity.v["time_allocated"]),color=User.config["notify"])
-            # show details i.e. context and notes
-            activity.show_details()
-            # cprint("choose from one of the  following options", color=User.config["feedback-neutral"])
-            cprint(
-                "\nb: begin\te: edit \ts: set status\tr: reschedule\tde: delete \tc/n: context/notes\tx: exit",
-                color=User.config["feedback-neutral"],
-                end = '\n'
-            )
-            choice = input("-->\t")
-            if choice == "b":
-                activity.run_timer()
-                break
-            if choice == "e":
-                activity.activity_edit()
-                break
-            if choice == "s":
-                cprint(f"Current status\t--> {activity.v['status']}", color="yellow")
-                activity.set_status()
-                break
-            if choice == "r":
-                activity.change_date()
-                break
-            if choice == 'de':
-                self.ai.delete_activity(activity.id)
-                cprint("deleted activity", color=User.config["feedback-bad"])
-                break
-            if choice == 'c' or choice == 'n':
-                activity.add_context()
-            if choice == "x":
-                break
+
+    def explore(self):
+        explore_session = ExploreSessionHandler()
+        explore_session.orchestrate()

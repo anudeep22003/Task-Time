@@ -16,13 +16,19 @@ class GameManager:
             #! show my tasks for the day
             cprint("\nHere are your options: ", color=User.config["notify"])
             cprint(
-                "b: Start my day \t a: Add activity \t e: End session \t l: Lookback at today \t t: Show tomorrow",
+                "b: Start my day \t a: Add activity \t e: End session \t l: Lookback at today \t t: Show tomorrow\
+                \tex: explore mode    ",
                 color="yellow",
             )
             path = input("choose option\t--> ")
             if path == "e":
                 cprint("ending your day. Goodnight, see you tomorrow", color="yellow")
                 break
+            if path == 'ex':
+                cprint("Starting explore mode")
+                # add an explore mode here
+                self.session.explore()
+                
             if path == "a":
                 self.session.create_activity_session()
             if path == "b":
