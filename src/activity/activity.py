@@ -75,7 +75,7 @@ class Activity:
         t = self.timer(length_of_time, start_time, units='mins')
         
         # change status to active to mark that this task is currently running
-        self.updated_set_status(status='ACTIVE')
+        self.set_status(status='ACTIVE')
         
         # we start the timer
         time_used = t.stopwatch_orchestrator()
@@ -98,9 +98,9 @@ class Activity:
         
         
     @update_values
-    def updated_activity_edit(self, 
-                              new_act_description:str = "", 
-                              new_act_time: str = ""):
+    def activity_edit(self, 
+                              new_act_description:str, 
+                              new_act_time: str):
         
         # generate default values if user presses enter without entering anything
         if not new_act_description:
@@ -113,22 +113,22 @@ class Activity:
     
 
     @update_values
-    def updated_update_time(self, extra_time: int):
+    def update_time(self, extra_time: int):
         self.query.q_add_time(extra_time)
     
     @update_values
-    def updated_set_status(self, status: str):
+    def set_status(self, status: str):
         self.query.q_activity_status_update(status)
 
     @update_values
-    def updated_change_date(self, days: int):
+    def change_date(self, days: int):
         self.query.q_activity_date_update(days_offset=days)
     
-    def updated_add_context(self, context: str):
-        self.query_details.q_add_context_notes(context=context)
+    def add_context(self, context: str):
+        self.query_details.q_add_context(context=context)
         
-    def updated_add_notes(self, note: str):
-        self.query_details.q_add_context_notes(notes=note)
+    def add_notes(self, note: str):
+        self.query_details.q_add_notes(notes=note)
 
 
     def create_activity(self, activity: str = "", days_offset:int = 1):
@@ -161,7 +161,10 @@ class Activity:
             if not context and not notes:
                 pass
             else:
-                cprint(f"__Context:__\n{context}\n\n__Notes:__\n{notes}", color = User.config["feedback-good"], end = '\n')
+                cprint(f"__Context:__", color = "white", on_color= "on_green", end = '\n')
+                cprint(f"{context}", color = User.config["feedback-good"], end = '\n\n')
+                cprint(f"__Notes:__", color = "white", on_color= "on_green", end = '\n')
+                cprint(f"{notes}", color = User.config["feedback-good"], end = '\n')
 
     
                 

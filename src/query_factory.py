@@ -75,19 +75,13 @@ class SqlActivityDetailsQueryFactory:
         self.sql.execute_write_query(q)
         pass
     
-    def q_add_context_notes(self, context: str = "", notes: str = ""):
-        
-        if context:
-            context = f" {context}"
-        if notes:
-            notes = f" {notes}"
+    def q_add_context(self, context: str):
         
         q = f""" 
         
         UPDATE activity_details
         SET 
-        context = context || "{context}",
-        notes = notes || "{notes}"
+        context = context || "{context}" || char(10) 
         
         WHERE
         activity_id = {self.id}
@@ -95,6 +89,21 @@ class SqlActivityDetailsQueryFactory:
         
         self.sql.execute_write_query(q)
         pass
+    
+    def q_add_notes(self, notes:str):
+        
+        q = f"""
+        UPDATE activity_details
+        SET 
+        notes = notes || "{notes}" || char(10) 
+        
+        WHERE 
+        activity_id = {self.id}
+        
+        """
+
+        self.sql.execute_write_query(q)
+    
     
     def show_details(self):
         q = f"""
