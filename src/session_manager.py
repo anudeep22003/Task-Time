@@ -26,7 +26,7 @@ class SessionManager:
                 pass
             else:
                 
-                self.updated_task_session(id)
+                self.task_session(id)
                 
             #     activity = self.ai.instantiate_activity(id)
             #     self.task_session(activity)
@@ -54,7 +54,7 @@ class SessionManager:
     def lookahead_session(self):
         self.ai.look(direction="ahead")
 
-    def updated_task_session(self, id: int):
+    def task_session(self, id: int):
         activity_session = ActivitySessionHandler(id)
         activity_session.orchestrate()
 

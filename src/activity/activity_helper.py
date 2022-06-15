@@ -328,7 +328,7 @@ class ExploreSessionHandler:
             if description == 'x':
                 break
             else:
-                activity.updated_activity_edit(new_act_description=description)
+                activity.activity_edit(new_act_description=description)
                 break
                 
     def activity_run_timer(self, activity: Activity):
@@ -342,7 +342,7 @@ class ExploreSessionHandler:
             cprint("how much more time?")
             try:
                 time = int(input("--> "))
-                activity.updated_update_time(time)
+                activity.update_time(time)
 
                 # continue the timer
                 break
@@ -372,7 +372,7 @@ class ExploreSessionHandler:
     
     def activity_exit(self, activity: Activity):
         # update status to done 
-        activity.updated_set_status(status = 'COMPLETED')
+        activity.set_status(status = 'COMPLETED')
         
     
     def end_flow(self, activity: Activity):
