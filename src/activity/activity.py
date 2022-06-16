@@ -6,7 +6,7 @@ import functools
 from enum_factory import User
 
 from query_factory import SqlActivityDetailsQueryFactory, SqlActivityQueryFactory, SqlGeneralQueryFactory
-from stopwatch import Timer
+# from stopwatch import Timer
 
 import time
 
@@ -23,7 +23,7 @@ class Activity:
         self.general_query = SqlGeneralQueryFactory()
         self.query = SqlActivityQueryFactory(id = self.id)
         self.query_details = SqlActivityDetailsQueryFactory(id)
-        self.timer = Timer
+        # self.timer = Timer
         
         self.v = self.set_reset_value(initialize=True)
 
@@ -45,56 +45,7 @@ class Activity:
             self.set_reset_value()
             return value_from_og_fn
         return update_values_decorator
-    
-    
-    def run_timer(self):
-        
-        """
-        This function uses the timer object that was passed during initialization and runs the timer.
-        - It sets the status as active when the timer starts
-        - the timer returns the #mins completed based on which the output to the stdio changes
-        - at the end, the 'activity_end_flow' function is called to give the user further options to end the task
-        
-        (if the user exits without the timer having run down, and the user doesnt set a status then the "ACTIVE" status is persisted)
-        """
-        
-        # extracts the time allocated value from the database and converts value to an int
-        time_allocated = int(self.v["time_allocated"])
-        
-        # extracts the time used from the db and also converts to int
-        time_used = int(self.v["time_used"])
-        
-        # length of time is how long the timer is to run 
-        # and it is the diffence between how much was allocated and how much was used 
-        length_of_time = time_allocated - time_used
-        
-        # we set the start time as time now
-        start_time = time.time()
-        
-        # we create a timer object with how long it is supposed to run and what the start time is
-        t = self.timer(length_of_time, start_time, units='mins')
-        
-        # change status to active to mark that this task is currently running
-        self.set_status(status='ACTIVE')
-        
-        # we start the timer
-        time_used = t.stopwatch_orchestrator()
-        
-        # debug 
-        # print(f"{time_used} min used.")
-        
-        # update the time used value
-        time_used = time_used + int(self.v["time_used"])
-        
-        # update the table with the time used
-        self.query.q_activity_update_time_used(time_used)
-        self.set_reset_value()
-        # debug
-        # print("Time used is updated, and values refreshed.\n")
-
-        # if timer runs down, ask user to set status
-        cprint(f"{time_used} of {time_allocated} mins done.")
-            
+                
         
         
     @update_values
@@ -131,19 +82,30 @@ class Activity:
         self.query_details.q_add_notes(notes=note)
 
 
-    def create_activity(self, activity: str = "", days_offset:int = 1):
+    def create_activity(self, activity: str = "", days_offset:int = 1, allocated_time:int = 0):
         
         row = []
         if not activity:
             activity = self.v["activity"]
-        allocated_time = self.v["time_allocated"]
+        if not allocated_time:
+            allocated_time = self.v["time_allocated"]
         created_by = self.id
         activity_date = date.today() + timedelta(days=days_offset)
         status = "NOT_STARTED"
         time_used = 0
         
         row.extend([created_by, activity, allocated_time, "", status, activity_date, time_used])
-        self.general_query.q_insert_row(payload=row)
+        daughter_id = self.general_query.q_insert_row(payload=row)
+        
+        # initialize the details table with the prior context and notes
+        daughter_details = SqlActivityDetailsQueryFactory(parent_activity_id = daughter_id)
+        
+        # copy over teh context and notes from the parent's details into the daughter
+        daughter_details.initialize_daughter_details(
+            context= self.query_details.get_context(),
+            notes= self.query_details.get_notes()
+        )
+        
 
 
     def show_feedback(self):
@@ -161,9 +123,9 @@ class Activity:
             if not context and not notes:
                 pass
             else:
-                cprint(f"__Context:__", color = "white", on_color= "on_green", end = '\n')
+                cprint(f"__Context:__", color = "grey", on_color= "on_green", end = '\n')
                 cprint(f"{context}", color = User.config["feedback-good"], end = '\n\n')
-                cprint(f"__Notes:__", color = "white", on_color= "on_green", end = '\n')
+                cprint(f"__Notes:__", color = "grey", on_color= "on_green", end = '\n')
                 cprint(f"{notes}", color = User.config["feedback-good"], end = '\n')
 
     

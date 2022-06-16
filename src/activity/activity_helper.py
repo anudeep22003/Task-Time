@@ -4,7 +4,7 @@ from datetime import date, timedelta
 from activity.activity import Activity
 from query_factory import SqlGeneralQueryFactory
 from enum_factory import User
-
+from stopwatch import Timer
 
 class ActivityInterfacer:
     def __init__(self) -> None:
@@ -62,12 +62,15 @@ class ActivityInterfacer:
         print("{:*^10s}\t{:*^10s}\t{:*<10s}\t{:*<20s}".format("", "", "", ""))
         for row in self.query.read_rows_by_status(status="INCOMPLETE"):
             id, activity, time_allocated, status, time_used = row
-            time_string = f"{time_used} / {time_allocated}"
+            time_string = f"{time_used} / {int(time_allocated)}"
             print(
                 "{:^10s}\t{:^10s}\t{:<10s}\t{:<20s}".format(
                     str(id), str(time_string), status, activity
                 )
             )
+        print("-"*68)
+        self.look_no_header()
+        print("-"*68)
         self.sum_orchestrator()
         # print sums 
     
@@ -90,6 +93,23 @@ class ActivityInterfacer:
         # total_aggregate = self.query.q_get_aggregate_all 
         pass
 
+    def look_no_header(self, direction:str = "back"):
+                
+        if direction == 'back':
+            data = self.query.read_rows_by_status(status="COMPLETED")
+        else:
+            data = self.query.read_rows_by_status(status="INCOMPLETE", days_offset=1)
+        
+        for row in data:
+            id, activity, time_allocated, status, time_used = row
+            time_string = f"{str(time_used)} / {str(time_allocated)}"
+            print(
+                "{:^10s}\t{:^10s}\t{:<10s}\t{:<20s}".format(
+                    str(id), str(time_string), status, activity
+                )
+            )
+        pass
+    
     def look(self, direction:str = "back"):
         print(
             "{:^10s}\t{:^10s}\t{:<10s}\t{:<20s}".format(
@@ -121,6 +141,7 @@ class ActivityInterfacer:
 class ActivitySessionHandler:
     def __init__(self, id:int) -> None:
         self.activity = Activity(id)
+        self.timer = Timer
         pass
 
     
@@ -149,7 +170,8 @@ class ActivitySessionHandler:
             choice = input("-->\t")
             if choice == "b":
                 #! how to handle if timer has been used
-                self.activity.run_timer()
+                Timer(self.activity).run_timer()
+                #self.activity.run_timer()
                 
             if choice == "e":
                 self.edit_activity()
@@ -197,18 +219,28 @@ class ActivitySessionHandler:
             if not days_in_future:
                 days_in_future = 1
             
+            allocated_time = input("Time you need for the event? (default: {} mins) \t--> ".format(self.activity.v["time_allocated"]))
+            
+            if allocated_time == 'x':
+                break
+            
+            if not allocated_time:
+                allocated_time = 0
+            
             try:
                 days_in_future = int(days_in_future)
-                self.activity.create_activity(activity_desc, days_in_future)
+                allocated_time = int(allocated_time)
+                
+                self.activity.create_activity(activity_desc, days_in_future,allocated_time)
                 
                 cprint("Alert -->", end = '\t', color="red")
                 if activity_desc:
-                    cprint(f"{activity_desc} created a related event -- {days_in_future} days -- in the future\n")
+                    cprint(f"[{activity_desc}] created a daughter event [{activity_desc}] -- {days_in_future} days -- in the future\n")
                 else:
                     cprint(f"Activity duplicated -- {days_in_future} days --  in the future\n")
                 
             except Exception as e:
-                cprint("Wrong value for days, enter integer", color='red')
+                cprint(f"{e}! Wrong value for days, enter integer", color='red')
                 
                 
 
@@ -218,10 +250,10 @@ class ActivitySessionHandler:
     def edit_activity(self):
     
         cprint("Enter new values or press Enter to leave unchanged", color = 'yellow')
-        activity_description = input("Description\t-->")
+        activity_description = input("Description -->\t")
     
         cprint("Enter new allocated time (or press enter to leave unchanged)", color="yellow")    
-        new_time = input("Time\t--> ")
+        new_time = input("Time -->\t")
         
         self.activity.activity_edit(activity_description,new_time)
 
@@ -333,7 +365,9 @@ class ExploreSessionHandler:
                 
     def activity_run_timer(self, activity: Activity):
         cprint("Starting timer\n", color='yellow')
-        activity.run_timer()
+        t = Timer(activity)
+        t.run_timer()
+        # activity.run_timer()
         self.end_flow(activity)
         
 
