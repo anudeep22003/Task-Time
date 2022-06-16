@@ -18,6 +18,13 @@ class SqlActivityQueryFactory:
         
         return self.sql.execute_write_query(q)
     
+    def q_activity_add_time_used(self, incremental_time_used:int):
+        q = f"""UPDATE activity
+        SET time_used = time_used + {incremental_time_used}
+        WHERE id = {self.id}
+        """
+        
+        return self.sql.execute_write_query(q)
 
 
     def q_add_time(self, extra_time: int = 0):
@@ -75,6 +82,34 @@ class SqlActivityDetailsQueryFactory:
         self.sql.execute_write_query(q)
         pass
     
+    def initialize_daughter_details(self, context: str, notes:str):
+        
+        if context:
+            self.q_add_context(context)
+            self.q_add_separator(field='context')
+        
+        if notes:
+            self.q_add_notes(notes)
+            self.q_add_separator(field='notes')
+        
+        pass
+    
+    def q_add_separator(self, field: str = "context"):
+        separator = f'----------- Above added on {date.today().strftime("%d-%b-%y")} --------------'
+        
+        q = f""" 
+        
+        UPDATE activity_details
+        SET 
+        {field} = {field} || char(10) || "{separator}"
+        
+        WHERE
+        activity_id = {self.id}
+        """
+        
+        self.sql.execute_write_query(q)
+    
+    
     def q_add_context(self, context: str):
         
         q = f""" 
@@ -111,6 +146,25 @@ class SqlActivityDetailsQueryFactory:
         WHERE activity_id = {self.id}
         """
         return self.sql.execute_read_query(q)
+    
+    def get_context(self):
+        q = f"""
+        SELECT context FROM activity_details 
+        WHERE activity_id = {self.id}
+        """
+        
+        for row in self.sql.execute_single_read_query(q):
+            context = row
+        return context
+
+    def get_notes(self):
+        q = f"""
+        SELECT notes FROM activity_details 
+        WHERE activity_id = {self.id}
+        """
+        for row in self.sql.execute_single_read_query(q):
+            notes = row
+        return notes
 
 
 class SqlGeneralQueryFactory:
@@ -179,7 +233,8 @@ class SqlGeneralQueryFactory:
         if status == "INCOMPLETE":
             # filter = [f"and {k} = {v}" for k,v in status.items()]
             q = f"""select id, activity, time_allocated, status, time_used from activity 
-                    where date = "{d}" and status != "COMPLETED" 
+                    where date = "{d}" and status != "COMPLETED"
+                    ORDER BY status, time_allocated DESC
             """
 
         elif status == "COMPLETED":
@@ -253,3 +308,6 @@ class SqlQueryExecutor:
 
     def execute_read_query(self, q):
         return self.cur.execute(q).fetchall()
+    
+    def execute_single_read_query(self, q):
+        return self.cur.execute(q).fetchone()
