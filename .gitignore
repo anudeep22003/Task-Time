@@ -127,15 +127,14 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-<<<<<<< HEAD
 
 # DB-Stuff
-.db
-.sqbpro
-=======
-<<<<<<< HEAD
-=======
+*.db
+*.sqbpro
 
-# DB-Stuff
-.db
-.sqbpro
+# Experiments
+*experiments/
+*data/
+
+# Commit Messages
+*commit_message.md 

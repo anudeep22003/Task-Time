@@ -82,7 +82,7 @@ class SqlActivityDetailsQueryFactory:
         self.sql.execute_write_query(q)
         pass
     
-    def initialize_daughter_details(self, context: str, notes:str):
+    def initialize_daughter_details(self, context: str, notes:str= ""):
         
         if context:
             self.q_add_context(context)
@@ -91,6 +91,7 @@ class SqlActivityDetailsQueryFactory:
         if notes:
             self.q_add_notes(notes)
             self.q_add_separator(field='notes')
+
         
         pass
     
@@ -101,7 +102,7 @@ class SqlActivityDetailsQueryFactory:
         
         UPDATE activity_details
         SET 
-        {field} = {field} || char(10) || "{separator}"
+        {field} = {field} || char(10) ||  char(10) || "{separator}"
         
         WHERE
         activity_id = {self.id}
@@ -116,7 +117,7 @@ class SqlActivityDetailsQueryFactory:
         
         UPDATE activity_details
         SET 
-        context = context || "{context}" || char(10) 
+        context = context || char(10) || "{context}" 
         
         WHERE
         activity_id = {self.id}
@@ -130,7 +131,7 @@ class SqlActivityDetailsQueryFactory:
         q = f"""
         UPDATE activity_details
         SET 
-        notes = notes || "{notes}" || char(10) 
+        notes = notes || char(10) || "{notes}" 
         
         WHERE 
         activity_id = {self.id}

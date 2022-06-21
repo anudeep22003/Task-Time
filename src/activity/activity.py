@@ -4,11 +4,11 @@ from pprint import pprint
 from termcolor import cprint
 import functools
 from enum_factory import User
-
 from query_factory import SqlActivityDetailsQueryFactory, SqlActivityQueryFactory, SqlGeneralQueryFactory
 # from stopwatch import Timer
 
 import time
+
 
 
 
@@ -100,10 +100,9 @@ class Activity:
         # initialize the details table with the prior context and notes
         daughter_details = SqlActivityDetailsQueryFactory(parent_activity_id = daughter_id)
         
-        # copy over teh context and notes from the parent's details into the daughter
+        # the user can only add notes, the notes are copied into the context of the daughter
         daughter_details.initialize_daughter_details(
-            context= self.query_details.get_context(),
-            notes= self.query_details.get_notes()
+            context= self.query_details.get_notes()
         )
         
 
