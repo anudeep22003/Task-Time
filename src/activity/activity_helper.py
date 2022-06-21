@@ -19,11 +19,11 @@ class ActivityInterfacer:
                             ):
         while True:
             row = []
-            activity = input("what is the activity \t (press 'x' to exit)\t--> ")
+            activity = input("\nwhat is the activity \t (press 'x' to exit)\t--> ")
             if activity.lower() == "x":
                 break
             allocated_time = input("how much time? \t--> ")
-            print("\n", end="")
+            # print("\n", end="")
             created_by = creator
             activity_date = date.today() + timedelta(days=0)
             status = "NOT_STARTED"
@@ -102,7 +102,7 @@ class ActivityInterfacer:
         
         for row in data:
             id, activity, time_allocated, status, time_used = row
-            time_string = f"{str(time_used)} / {str(time_allocated)}"
+            time_string = f"{str(time_used)} / {str(int(time_allocated))}"
             print(
                 "{:^10s}\t{:^10s}\t{:<10s}\t{:<20s}".format(
                     str(id), str(time_string), status, activity
@@ -163,7 +163,7 @@ class ActivitySessionHandler:
             # show details i.e. context and notes
             # cprint("choose from one of the  following options", color=User.config["feedback-neutral"])
             cprint(
-                "\n(b))egin\t(t)ime add\t(e)dit\t(s)tatus\t(r)eschedule\t(d)aughter\t(c)ontext\t(n)otes\te(x)it",
+                "\n(b))egin\t(t)ime add\t(e)dit\t(s)tatus\t(r)eschedule\t(d)aughter\t(c)ontext [deprecated]\t(n)otes\te(x)it",
                 color=User.config["feedback-neutral"],
                 end = '\n'
             )
