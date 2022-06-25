@@ -14,9 +14,9 @@ class SessionManager:
         cprint("Goodmorning! Here are your tasks for the day")
         self.ai.start_day()
 
-    def begin_today_session(self):
+    def begin_today_session(self, days_offset: int = 0):
         while True:
-            self.ai.start_day()
+            self.ai.start_day(days_offset=days_offset)
             cprint("\nchoose the task id you want to start with", color=User.config["notify"])
             id = input("Select id --> ")
             if id == "x" or id == "X":
@@ -25,8 +25,11 @@ class SessionManager:
                 self.bulk_reschedule()
                 pass
             else:
-                
-                self.task_session(id)
+                try: 
+                    int(id)
+                    self.task_session(id)
+                except Exception as e:
+                    cprint("Invalid choice, try again.")
                 
             #     activity = self.ai.instantiate_activity(id)
             #     self.task_session(activity)
@@ -38,7 +41,7 @@ class SessionManager:
         cprint("you are in the bulk reschedule mode", color=User.config["notify"])
         ids = input("Enter all the ids you want to reschedule separated by space\n--> ")
         activity_id_list = [int(i) for i in ids.split()]
-        days_in_future = int(input("how many days in teh future?\t--> "))
+        days_in_future = int(input("how many days in the future?\t--> "))
         for activity_id in activity_id_list:
             activity = self.ai.instantiate_activity(activity_id)
             activity.query.q_activity_date_update(days_in_future)
