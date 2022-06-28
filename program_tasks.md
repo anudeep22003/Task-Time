@@ -9,6 +9,7 @@
 
 
 ## Bugs
+- [] Notes being copied to context are not adding to the entire history (see 27/06/22 for eg)
 - [x] Asking for extra time and restarting again does not remember the amount of time passed in the previous iteration.
 - [x] duplicating is not making a replica, rather it is moving the same event to the next day
 - [x] Add ability to explore task, just do a task and add details later
@@ -18,10 +19,17 @@
 - [] Add ability to distribute an event over many days. Eg do twitter writeup 30 mins/day 3 times over 5 days.
 - [] Show in the view how many lines of context and/or notes the activity has
 - [] Capture streak of the activity
-- [] when I add a task, show me number of hours accounted for in the day
-- [] dual thread so that timer stays running and I can take notes
-- [] keep track of number of hours scheduled (so i dont overbook my day)
+- [] When I add a task, show me number of hours accounted for in the day
+- [] Dual thread so that timer stays running and I can take notes
+- [] Keep track of number of hours scheduled (so i dont overbook my day)
+- [] Rechedule takes current day into account. This becomes confusing. Do reschedule based on the date in the db
+- [] Subtask timers i.e show the current subtask and add a timer for that
+- [] show how long activity has been paused (used explore track to keep track of that)
+- [] Add grouping for tasks so you can drill into a category and finish those first (eg: big tasks, small tasks, break tasks. revenue tasks, etc)
 
+## UI improvements
+- [] Show date when you have begun your day since now you can start a previous day
+- 
 
 ## Complex features
 - [] Capture sub tasks while doing main task (start timer for them)

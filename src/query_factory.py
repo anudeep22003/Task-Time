@@ -160,12 +160,12 @@ class SqlActivityDetailsQueryFactory:
 
     def get_notes(self):
         q = f"""
-        SELECT notes FROM activity_details 
+        SELECT context, notes FROM activity_details 
         WHERE activity_id = {self.id}
         """
         for row in self.sql.execute_single_read_query(q):
             notes = row
-        return notes
+        return notes 
 
 
 class SqlGeneralQueryFactory:
