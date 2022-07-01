@@ -53,14 +53,14 @@ class ActivityInterfacer:
         
         
 
-    def start_day(self):
+    def start_day(self, days_offset: int = 0):
         print(
             "\n{:^10s}\t{:^10s}\t{:<10s}\t{:<20s}".format(
                 "id", "time", "status", "activity"
             )
         )
         print("{:*^10s}\t{:*^10s}\t{:*<10s}\t{:*<20s}".format("", "", "", ""))
-        for row in self.query.read_rows_by_status(status="INCOMPLETE"):
+        for row in self.query.read_rows_by_status(status="INCOMPLETE",days_offset=days_offset):
             id, activity, time_allocated, status, time_used = row
             time_string = f"{time_used} / {int(time_allocated)}"
             print(

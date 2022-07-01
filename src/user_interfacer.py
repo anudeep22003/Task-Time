@@ -28,7 +28,7 @@ class GameManager:
         while True:
             #! show my tasks for the day
             
-            valid_choices = ['b', 'a', 'e', 't', 'ex']
+            valid_choices = ['b', 'a', 'e', 't', 'ex', 'b-1']
             
             cprint(
                 "\nOptions > \t(b)egin my day \t (a)dd activity \t (e)nd session \t (t)omorrow peek\t (ex)plore mode",
@@ -44,6 +44,8 @@ class GameManager:
                 self.session.create_activity_session()
             elif path == "b":
                 self.session.begin_today_session()
+            elif path == 'b-1':
+                self.session.begin_today_session(days_offset=-1)
             elif path == "t":
                 self.session.lookahead_session()
             elif path == 'ex':
