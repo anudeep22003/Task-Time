@@ -137,4 +137,5 @@ dmypy.json
 *data/
 
 # Commit Messages
+*program_tasks.md
 *commit_message.md 
