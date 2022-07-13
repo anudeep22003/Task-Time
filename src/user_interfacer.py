@@ -28,10 +28,10 @@ class GameManager:
         while True:
             #! show my tasks for the day
             
-            valid_choices = ['b', 'a', 'e', 't', 'ex', 'b-1']
+            valid_choices = ['b', 'a', 'e', 't', 'ex', 'b-1', 'ad']
             
             cprint(
-                "\nOptions > \t(b)egin my day \t (a)dd activity \t (e)nd session \t (t)omorrow peek\t (ex)plore mode",
+                "\nOptions > \t(b)egin my day \t (a)dd activity \t(ad) distributed activity\t (e)nd session \t (t)omorrow peek\t (ex)plore mode",
                 color="yellow",
             )
             path = input("choose option\t--> ")
@@ -42,6 +42,8 @@ class GameManager:
                 break
             elif path == "a":
                 self.session.create_activity_session()
+            elif path == 'ad':
+                self.session.create_distributed_activity_session()
             elif path == "b":
                 self.session.begin_today_session()
             elif path == 'b-1':

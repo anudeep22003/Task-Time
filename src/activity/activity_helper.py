@@ -1,4 +1,5 @@
-
+import random 
+from math import ceil
 from termcolor import cprint
 from datetime import date, timedelta
 from activity.activity import Activity
@@ -13,27 +14,106 @@ class ActivityInterfacer:
 
     def delete_activity(self, id: int):
         self.query.q_delete_activity(id)
+
+    def create_distributed_activity(self, 
+                                    activity: str,
+                                    total_time: int,
+                                    num_of_days:int, 
+                                    activity_chunk_size: int = 1,
+                                    num_of_days_in_future_to_start_from:int = 0,
+                                    incl_weekdays: bool = True,
+                                    incl_weekends: bool = False):
+       """
+       Takes activity parameters and distributes an activity over a certain time frame.
+       Allows you to dedicate 6 hours over the next week to focus on a particular task 
+       
+       Parameters:
+       - task_name: str
+       - total_time: int --> time in hours
+       - num_days: int --> to distribute over
+       - num_of_days_in_future_to_start_from: int --> whether to start from today/tomorrow or more 
+       - activity_chunk_size: int --> how big is each activity
+       - incl_weekdays: bool --> if the sampler should take into account weekdays
+       - incl_weekends: bool --> if the sampler should take into account weekends
+
+       Method:
+       Create an array of datetime objects (or strings) and randomize the array.
+       Lenth of array is `num_of_days` and you will select the first n elements where n = total_time/activity_chunk_size
+       
+       Complication:
+       - The activity should have numbering --> (5/7) Activity name 
+       - the susequent activities should have the previous one be their creator 
+       - You have to copy context to the next one. This will become complex. 
+       """
+       # based on weekends allowed or not, accumulate a list of candidate days
+       candidate_event_schedule = list()
+
+       # this is the number of events that need to created
+       num_of_events = ceil(total_time*60/activity_chunk_size)
+       
+       # whether the first day to start event from is today or tomorrow or future
+       start_day = date.today() + timedelta(days=num_of_days_in_future_to_start_from)
+       day_offset = 0
+       
+       while len(candidate_event_schedule)<num_of_days:
+           day_candidate = start_day + timedelta(days=day_offset)
+           # adds the day to the candidate schedule based on weekend and weekday prefs
+           if incl_weekdays and day_candidate.weekday() not in [5,6]:
+               candidate_event_schedule.append(day_candidate)
+               day_offset+=1
+           elif incl_weekends and day_candidate.weekday() in [5,6]:
+               candidate_event_schedule.append(day_candidate)
+               day_offset+=1
+       
+       # shuffle the candidates to distribute
+       random.shuffle(candidate_event_schedule)
+       
+       if num_of_days<num_of_events:
+           cprint("not enough days entered to distribute", color='red', on_color='on_yellow')
+       else:
+           schedule = candidate_event_schedule[:num_of_events]
+       
+       creator = 'Anudeep'
+       for num,day in enumerate(schedule):
+           activity_string = f"({num+1}/{num_of_events}) {activity}"
+           creator = self.activity_creator(activity_string, 
+                                 allocated_time=activity_chunk_size,
+                                 creator=creator,
+                                 activity_date=day,
+                                 )
+           cprint(f"Activity {num} created {(day-date.today()).days} days in the future.", color='green' ,on_color='on_white')
+    
+    
+    def activity_creator(self,
+                         activity, 
+                         allocated_time, 
+                         creator: str,
+                         status: str = "NOT_STARTED",
+                         activity_date: date = date.today(),
+    ):
+
+        created_by = creator
+        time_used = 0
+
+        activity_row_to_insert = [created_by, activity, allocated_time, "", status, activity_date, time_used]
+        return self.query.q_insert_row(payload = activity_row_to_insert)
     
     def create_new_activity(self, 
                             creator="Anudeep" 
                             ):
         while True:
-            row = []
-            activity = input("\nwhat is the activity \t (press 'x' to exit)\t--> ")
-            if activity.lower() == "x":
-                break
-            allocated_time = input("how much time? \t--> ")
-            # print("\n", end="")
-            created_by = creator
-            activity_date = date.today() + timedelta(days=0)
-            status = "NOT_STARTED"
-            time_used = 0
-
-            row.extend(
-                [created_by, activity, allocated_time, "", status, activity_date, time_used]
-            )
-
-            self.query.q_insert_row(payload = row)
+            try:
+                row = []
+                activity = input("\nwhat is the activity \t (press 'x' to exit)\t--> ")
+                if activity.lower() == "x":
+                    break
+                allocated_time = input("how much time? \t--> ")
+                if allocated_time == 'x':
+                    break
+                int(allocated_time)
+                self.activity_creator(activity, allocated_time, creator=creator)
+            except Exception as e:
+                cprint("Enter integer value for time", color='red', on_color='on_yellow')
 
     def create_empty_activity(self, time:int = 30, creator = "Anudeep"):
         
