@@ -51,6 +51,42 @@ class SessionManager:
     def create_activity_session(self):
         self.ai.create_new_activity()
 
+    def create_distributed_activity_session(self):
+        cprint("you are creating a distributed bulk event")
+        activity_name = input("activity name -->\t",end = '--'*30)
+        total_time = int(input("total time you want to allocate for this (hours)-->\t"), end = '--'*30)
+        num_of_days = int(input("how many days do you want to spread this over? -->\t"), end = '--'*30)
+        activity_chunk_size = input("size of each event (default 60 mins) --\t", end = '--'*30)
+        if not activity_chunk_size:
+            activity_chunk_size=60
+        else:
+            int(activity_chunk_size)
+        num_of_days_in_future_to_start_from = input("How many days to start from in the future (default 0)-->\t", end = '--'*30)
+        if not num_of_days_in_future_to_start_from:
+            num_of_days_in_future_to_start_from=0
+        else:
+            int(num_of_days_in_future_to_start_from)
+        
+        incl_weekdays = input("Include weekdays (default: 1 (Yes)", end = '--'*30)
+        if not incl_weekdays:
+            incl_weekdays = True
+        else:
+            incl_weekdays = False
+        incl_weekends = input("Include weekends (default: 1 (Yes)", end = '--'*30)
+        if not incl_weekends:
+            incl_weekends = True
+        else:
+            incl_weekends = False
+        
+        self.ai.create_distributed_activity(
+            activity=activity_name,
+            total_time=total_time,
+            num_of_days=num_of_days,
+            activity_chunk_size=activity_chunk_size,
+            incl_weekdays = incl_weekdays,
+            incl_weekends=incl_weekends,
+        )
+
     def lookback_session(self):
         self.ai.look(direction='back')
         

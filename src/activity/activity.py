@@ -3,9 +3,9 @@ from datetime import date, timedelta
 from pprint import pprint
 from termcolor import cprint
 import functools
-from enum_factory import User
 from query_factory import SqlActivityDetailsQueryFactory, SqlActivityQueryFactory, SqlGeneralQueryFactory
 # from stopwatch import Timer
+from enum_factory import User
 
 import time
 
