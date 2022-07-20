@@ -1,8 +1,9 @@
-Added ability to see yesterday's activities
+Fixed activity distribution bugs
 
 # Bugs Removed
-- Entering a non-int value at the select id stage broke the program. Added exception handling there. 
-- Corrected spelling in a few UI text prompt places
+- latest commit was not added, some functins (input in particular) was incorrectly structured
+- The incl_weekend and incl_weekday flags were not working outside their defaults values. Fixed this locating error to the way the offset days were being incremented and poorly structured if-else loop. 
+- days were only being offset inside the if else loop, moved it outside. 
 
 # Usability improvements
-- Frequently found myself wanting for a way to look at yesterday's activities. Now you can by typing `b-1` into selection area. Previously `b` started your today, now hidden option of `b-1` which launches yesterday's activities to reschedule etc. 
+- Added view of how many additional days are needed in the case that the num of days was not sufficient to distribute the activity

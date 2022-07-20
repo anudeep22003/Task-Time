@@ -58,30 +58,33 @@ class ActivityInterfacer:
        while len(candidate_event_schedule)<num_of_days:
            day_candidate = start_day + timedelta(days=day_offset)
            # adds the day to the candidate schedule based on weekend and weekday prefs
-           if incl_weekdays and day_candidate.weekday() not in [5,6]:
+           if (incl_weekdays) and (day_candidate.weekday() not in [5,6]):
                candidate_event_schedule.append(day_candidate)
-               day_offset+=1
-           elif incl_weekends and day_candidate.weekday() in [5,6]:
+           if (incl_weekends) and (day_candidate.weekday() in [5,6]):
                candidate_event_schedule.append(day_candidate)
-               day_offset+=1
+           day_offset+=1
        
        # shuffle the candidates to distribute
        random.shuffle(candidate_event_schedule)
        
        if num_of_days<num_of_events:
-           cprint("not enough days entered to distribute", color='red', on_color='on_yellow')
+           additional_req_days = num_of_events - num_of_days
+           cprint(f"not enough days to distribute, {additional_req_days} needed", color='red', on_color='on_yellow')
+
        else:
            schedule = candidate_event_schedule[:num_of_events]
+           creator = 'Anudeep'
+           for num, day in enumerate(sorted(schedule)):
+               activity_string = f"({num+1}/{num_of_events}) {activity}"
+               creator = self.activity_creator(activity_string,
+                                               allocated_time=activity_chunk_size,
+                                               creator=creator,
+                                               activity_date=day,
+                                               )
+               cprint(f"Activity {num} created {(day-date.today()).days} days in the future.",
+                      color='green', on_color='on_white')
+
        
-       creator = 'Anudeep'
-       for num,day in enumerate(schedule):
-           activity_string = f"({num+1}/{num_of_events}) {activity}"
-           creator = self.activity_creator(activity_string, 
-                                 allocated_time=activity_chunk_size,
-                                 creator=creator,
-                                 activity_date=day,
-                                 )
-           cprint(f"Activity {num} created {(day-date.today()).days} days in the future.", color='green' ,on_color='on_white')
     
     
     def activity_creator(self,
