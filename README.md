@@ -10,31 +10,31 @@ Simple task manager where the focus is on the time allocated for each task. This
 # Tasks
 
 ## Currently working 
-- [] Add ability to check task as done.
+- [ ] Add ability to check task as done.
 
 ### Features
 
 ### Bugs
 
 ## Simple features
-- [] capture last edit time, so if I spend time taking notes or something, the time is accounted for.
-- [] Show in the view how many lines of context and/or notes the activity has
-- [] Capture streak of the activity
-- [] when I add a task, show me number of hours accounted for in the day
-- [] dual thread so that timer stays running and I can take notes
-- [] keep track of number of hours scheduled (so i dont overbook my day)
-- [] add ability to pause the timer
+- [ ] capture last edit time, so if I spend time taking notes or something, the time is accounted for.
+- [ ] Show in the view how many lines of context and/or notes the activity has
+- [ ] Capture streak of the activity
+- [ ] when I add a task, show me number of hours accounted for in the day
+- [ ] dual thread so that timer stays running and I can take notes
+- [ ] keep track of number of hours scheduled (so i dont overbook my day)
+- [ ] add ability to pause the timer
 
 
 ## Complex features
-- [] Capture sub tasks while doing main task (start timer for them)
-- [] Perform a search inline to bring up the relevant activity, so I can create a daughter of it. Eg: needed to create daughter to check with Naresh next weekend. However I had to find the task tomorrow to do that. Inline search would be helpful.
-- [] build simple tkinter ui 1
-- [] Use SQL Alchemy --> https://auth0.com/blog/sqlalchemy-orm-tutorial-for-python-developers/
-- [] have a graph always visible (analytics graph of your performance)
-- [] add task while timer timing down 
-- [] Can you start a cursor always from a \t position? SO multiline notes don't look ugly.
-- [] Use escape sequences to have a clear screen (specifically escape sequence to clear lines)
+- [ ] Capture sub tasks while doing main task (start timer for them)
+- [ ] Perform a search inline to bring up the relevant activity, so I can create a daughter of it. Eg: needed to create daughter to check with Naresh next weekend. However I had to find the task tomorrow to do that. Inline search would be helpful.
+- [ ] build simple tkinter ui 1
+- [ ] Use SQL Alchemy --> https://auth0.com/blog/sqlalchemy-orm-tutorial-for-python-developers/
+- [ ] have a graph always visible (analytics graph of your performance)
+- [ ] add task while timer timing down 
+- [ ] Can you start a cursor always from a \t position? SO multiline notes don't look ugly.
+- [ ] Use escape sequences to have a clear screen (specifically escape sequence to clear lines)
 
 ## Completed:
 
