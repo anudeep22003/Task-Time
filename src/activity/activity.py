@@ -68,6 +68,10 @@ class Activity:
         self.query.q_add_time(extra_time)
     
     @update_values
+    def update_time_used(self, time_used: int):
+        self.query.q_activity_update_time_used(time_used)
+
+    @update_values
     def set_status(self, status: str):
         self.query.q_activity_status_update(status)
 
@@ -101,23 +105,11 @@ class Activity:
         daughter_details = SqlActivityDetailsQueryFactory(parent_activity_id = daughter_id)
         
         # the user can only add notes, the notes are copied into the context of the daughter
-        # you have to check if context exists if it does include that too
-        # create a separate function to combine both context and note
         daughter_details.initialize_daughter_details(
-            context= self.concatenate_context_and_note()
+            context= self.query_details.get_notes()
         )
         
 
-    def concatenate_context_and_note(self):
-        concatenated_string = ""
-        for row in self.query_details.show_details():
-            context, notes = row 
-        if context:
-            concatenated_string = f"{concatenated_string}{context}"
-        if notes:
-            concatenated_string = f"{concatenated_string}\n{notes}"
-        
-        return concatenated_string
 
     def show_feedback(self):
         keys = ["#Activities", "Total time", "Average time"]

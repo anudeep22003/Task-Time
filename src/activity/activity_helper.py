@@ -1,3 +1,4 @@
+from logging import exception
 import random 
 from math import ceil
 from termcolor import cprint
@@ -69,7 +70,7 @@ class ActivityInterfacer:
        
        if num_of_days<num_of_events:
            additional_req_days = num_of_events - num_of_days
-           cprint(f"not enough days to distribute, {additional_req_days} needed", color='red', on_color='on_yellow')
+           cprint(f"not enough days to distribute, {additional_req_days} more days needed", color='red', on_color='on_yellow')
 
        else:
            schedule = candidate_event_schedule[:num_of_events]
@@ -110,9 +111,11 @@ class ActivityInterfacer:
                 activity = input("\nwhat is the activity \t (press 'x' to exit)\t--> ")
                 if activity.lower() == "x":
                     break
-                allocated_time = input("how much time? \t--> ")
+                allocated_time = input("how much time? (default time = 5 mins) \t--> ")
                 if allocated_time == 'x':
                     break
+                if not allocated_time:
+                    allocated_time = 5
                 int(allocated_time)
                 self.activity_creator(activity, allocated_time, creator=creator)
             except Exception as e:
@@ -146,11 +149,19 @@ class ActivityInterfacer:
         for row in self.query.read_rows_by_status(status="INCOMPLETE",days_offset=days_offset):
             id, activity, time_allocated, status, time_used = row
             time_string = f"{time_used} / {int(time_allocated)}"
-            print(
-                "{:^10s}\t{:^10s}\t{:<10s}\t{:<20s}".format(
-                    str(id), str(time_string), status, activity
+            
+            if time_allocated < 10:
+                cprint(
+                    "{:^10s}\t{:^10s}\t{:<10s}\t{:<20s}".format(
+                        str(id), str(time_string), status, activity
+                    ), on_color='on_magenta', attrs=['underline']
                 )
-            )
+            else:
+                print(
+                    "{:^10s}\t{:^10s}\t{:<10s}\t{:<20s}".format(
+                        str(id), str(time_string), status, activity
+                    )
+                )
         print("-"*68)
         self.look_no_header()
         print("-"*68)
@@ -186,11 +197,18 @@ class ActivityInterfacer:
         for row in data:
             id, activity, time_allocated, status, time_used = row
             time_string = f"{str(time_used)} / {str(int(time_allocated))}"
-            print(
-                "{:^10s}\t{:^10s}\t{:<10s}\t{:<20s}".format(
-                    str(id), str(time_string), status, activity
+            if time_allocated < 10:
+                cprint(
+                    "{:^10s}\t{:^10s}\t{:<10s}\t{:<20s}".format(
+                        str(id), str(time_string), status, activity
+                    ), on_color='on_magenta', attrs=['underline']
                 )
-            )
+            else:
+                print(
+                    "{:^10s}\t{:^10s}\t{:<10s}\t{:<20s}".format(
+                        str(id), str(time_string), status, activity
+                    )
+                )
         pass
     
     def look(self, direction:str = "back"):
@@ -380,6 +398,18 @@ class ActivitySessionHandler:
             return
         elif not user_status_choice in status_choices.keys():
             cprint("Out of scope choice, try again", color='red')
+        elif user_status_choice == 'c':
+            allocated_time = int(self.activity.v["time_allocated"])
+            user_input_time = input("Enter time used (default = {})".format(allocated_time))
+            if not user_input_time:
+                user_input_time = allocated_time
+            else:
+                try:
+                    user_input_time = int(user_input_time) 
+                except ValueError:
+                    print("enter appropriate numeric value for time")
+            self.activity.update_time_used(user_input_time)
+            self.activity.set_status(status_choices[user_status_choice])
         else:
             self.activity.set_status(status_choices[user_status_choice])
         
